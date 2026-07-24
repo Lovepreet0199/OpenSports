@@ -1,44 +1,71 @@
-import { StyleSheet, Text } from "react-native";
+import { StyleSheet, Text, ScrollView } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import AppHeader from "@/components/AppHeader";
-import EventCard from "@/components/EventCard";
+// import EventCard from "@/components/EventCard";
 import SessionCard from "@/components/SesssionCard";
 import AppButton from "@/components/PrimaryButton";
 
 export default function PlayerHomeScreen() {
   return (
-    <SafeAreaView style={styles.container}>
-      <AppHeader title="Tuesday Pickleball" />
-      <EventCard
+    <ScrollView style={styles.scrollView}>
+      <SafeAreaView style={styles.container}>
+        <AppHeader title="Pickleball" />
+        {/* <EventCard
         format="Doubles"
         courtCount={3}
         location="East Side Rec"
         time="6:30 PM"
-      />
+      /> */}
+        {/*We don't need it anymore*/}
 
-      <Text style={styles.sectionTitle}>
-        {"TODAY'S SESSION"}
-      </Text>
+        <Text style={styles.sectionTitle}>
+          {"TODAY'S SESSION"}
+        </Text>
 
-      <SessionCard
-        date="Today, Tuseday"
-        time="6:30 PM"
-        checkedInPlayers={18}
-        totalPlayers={24}
-        location="East Side Rec Center"
-      />
-      <AppButton
-        title="Check In"
-        onPress={() => console.log("Check In pressed")}
-      />
+        <SessionCard
+          date="Today, Tuseday"
+          time="6:30 PM"
+          checkedInPlayers={18}
+          totalPlayers={24}
+          location="East Side Rec Center"
+        />
+        <AppButton
+          title="Check In"
+          onPress={() => console.log("Check In pressed")}
+        />
 
-      <AppButton
+        {/* <AppButton
         title="View Event"
         variant="secondary"
         onPress={() => console.log("View Event pressed")}
-      />
-    </SafeAreaView>
+      /> */}
+
+        <Text style={styles.sectionTitleUpcoming}>
+          {"UPCOMING EVENT"}
+        </Text>
+
+        <SessionCard
+          date="August 3, Monday"
+          time="6:30 PM"
+          checkedInPlayers={0}
+          totalPlayers={24}
+          location="East Side Rec Center"
+        />
+
+        <Text style={styles.sectionTitleUpcoming}>
+          {"UPCOMING TOURNAMENT"}
+        </Text>
+
+        <SessionCard
+          date="August 31, Monday"
+          time="6:30 PM"
+          checkedInPlayers={0}
+          totalPlayers={24}
+          location="East Side Rec Center"
+        />
+      </SafeAreaView>
+    </ScrollView >
   );
 }
 
@@ -55,8 +82,20 @@ const styles = StyleSheet.create({
     marginBottom: 12,
     fontSize: 15,
     fontWeight: "600",
-    color: "#7A8599",
+    color: "#2c9b3a",
     letterSpacing: 1,
     paddingHorizontal: 3,
+  },
+  sectionTitleUpcoming: {
+    marginTop: 28,
+    marginBottom: 12,
+    fontSize: 15,
+    fontWeight: "600",
+    color: "#7A8694",
+    letterSpacing: 1,
+    paddingHorizontal: 3,
+  },
+  scrollView: {
+
   },
 });
