@@ -1,10 +1,10 @@
-import { StyleSheet, Text, ScrollView } from "react-native";
+import { ScrollView, StyleSheet, View, Text } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import AppHeader from "@/components/AppHeader";
 // import EventCard from "@/components/EventCard";
+import AppButton from "@/components/AppButton";
 import SessionCard from "@/components/SesssionCard";
-import AppButton from "@/components/PrimaryButton";
 
 export default function PlayerHomeScreen() {
   return (
@@ -30,10 +30,13 @@ export default function PlayerHomeScreen() {
           totalPlayers={24}
           location="East Side Rec Center"
         />
-        <AppButton
-          title="Check In"
-          onPress={() => console.log("Check In pressed")}
-        />
+
+        <View style={styles.checkInButton}>
+          <AppButton
+            title="Check In"
+            onPress={() => console.log("Check In pressed")}
+          />
+        </View>
 
         {/* <AppButton
         title="View Event"
@@ -97,5 +100,8 @@ const styles = StyleSheet.create({
   },
   scrollView: {
 
+  },
+  checkInButton: {
+    marginTop: 14,
   },
 });
