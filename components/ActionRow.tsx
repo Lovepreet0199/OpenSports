@@ -4,12 +4,14 @@ import { Ionicons } from "@expo/vector-icons";
 type ActionRowProps = {
     iconName: keyof typeof Ionicons.glyphMap;
     title: string;
+    onPress?: () => void;
 };
 
-export default function ActionRow({ iconName, title }: ActionRowProps) {
+export default function ActionRow({ iconName, title, onPress }: ActionRowProps) {
     return (
 
-        <Pressable style={styles.actionRow}>
+        <Pressable style={styles.actionRow}
+            onPress={onPress}>
             <View style={styles.leftContent}>
                 <Ionicons
                     name={iconName}
@@ -28,6 +30,7 @@ export default function ActionRow({ iconName, title }: ActionRowProps) {
                 size={20}
                 color="black"
             />
+
 
         </Pressable>
 
