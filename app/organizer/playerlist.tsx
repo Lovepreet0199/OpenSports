@@ -1,13 +1,9 @@
-import AppHeader from "@/components/AppHeader";
-import PlayerList from "@/components/PlayerList";
+import { Text, View } from "react-native";
 
-export default function playerList() {
+export default function PlayerListScreen() {
     return (
-        <>
-            <AppHeader title="Players list" />
-            <PlayerList
-                checkbox="false"
-                name="Omar" />
-        </>
+        <View>
+            <Text>Players List comming soon</Text>
+        </View>
     );
 }

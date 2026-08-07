@@ -1,20 +1,24 @@
-import AppHeader from "@/components/AppHeader";
-import EventCard from "@/components/EventCard";
-import { Link, useRouter } from "expo-router";
-import { StyleSheet, Text, View, ScrollView, Pressable } from "react-native";
+import EventCard from "@/components/shared/EventCard";
+import AppButton from "@/components/shared/AppButton";
+import AppHeader from "@/components/shared/AppHeader";
+import { useRouter } from "expo-router";
+import { ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import ActionRow from "../../components/ActionRow";
-import AppButton from "@/components/AppButton";
+import ActionRow from "../../components/organizer/ActionRow";
 
 export default function OrganizerHomeScreen() {
     const router = useRouter();
     return (
-        <ScrollView>
-            <SafeAreaView style={styles.container}>
+        <SafeAreaView style={styles.safeArea}>
+            <ScrollView
+                style={styles.scrollView}
+                contentContainerStyle={styles.scrollContent}
+                showsVerticalScrollIndicator={false}>
+
                 <AppHeader title="Check-in & Set up" />
 
                 <EventCard
-                    eventName="Tuseday's Pickleball"
+                    eventName="Tuseday Pickleball"
                     format="Doubles"
                     courtCount={3}
                     location="East Side Rec"
@@ -54,32 +58,30 @@ export default function OrganizerHomeScreen() {
                         <Text style={styles.updateText}>Player cancelled: Lina</Text>
                     </View>
                 </View>
+
                 <View style={styles.startButton}>
                     <AppButton
                         title="Let's Start"
                         variant="primary"
-                        onPress={() => { }}
+                        onPress={() => router.push('/organizer/session')}
                     />
                 </View>
-            </SafeAreaView>
-        </ScrollView>
+            </ScrollView>
+        </SafeAreaView >
     );
 }
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        paddingHorizontal: 15,
-        backgroundColor: "#fff",
 
-    },
     checkInSection: {
         gap: 12,
     },
+
     section: {
         gap: 12,
         marginTop: 24,
     },
+
     sectionTitle: {
         fontSize: 18,
         fontWeight: "600",
@@ -99,14 +101,31 @@ const styles = StyleSheet.create({
 
     updateText: {
         paddingHorizontal: 16,
-        paddingVertical: 12,
-        fontSize: 15,
+        paddingVertical: 16,
+        fontSize: 16,
         color: "#6B7280",
         borderBottomWidth: 1,
         borderBottomColor: "#E5E7EB",
     },
+
     startButton: {
         marginTop: "auto",
         paddingBottom: 12,
     },
+
+    safeArea: {
+        flex: 1,
+        backgroundColor: "#FFFFFF",
+    },
+
+    scrollView: {
+        flex: 1,
+    },
+
+    scrollContent: {
+        flexGrow: 1,
+        paddingHorizontal: 15,
+        paddingBottom: 12,
+    },
+
 });

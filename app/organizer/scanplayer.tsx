@@ -1,9 +1,9 @@
-import AppHeader from "@/components/AppHeader";
+import AppHeader from "@/components/shared/AppHeader";
 
 export default function PlayerList() {
     return (
         <>
-        <AppHeader title="Scan players" />
+            <AppHeader title="Scan players" />
         </>
     );
 }

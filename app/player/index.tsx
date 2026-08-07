@@ -1,10 +1,10 @@
-import { ScrollView, StyleSheet, View, Text } from "react-native";
+import { ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import AppHeader from "@/components/AppHeader";
+import AppHeader from "@/components/shared/AppHeader";
 // import EventCard from "@/components/EventCard";
-import AppButton from "@/components/AppButton";
-import SessionCard from "@/components/SesssionCard";
+import SessionCard from "@/components/shared/SesssionCard";
+import AppButton from "@/components/shared/AppButton";
 
 export default function PlayerHomeScreen() {
   return (

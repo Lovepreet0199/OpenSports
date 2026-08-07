@@ -1,9 +1,9 @@
-import AppHeader from "@/components/AppHeader";
+import AppHeader from "@/components/shared/AppHeader";
 
 export default function SetUpTeams() {
     return (
         <>
-        <AppHeader title="Tournament Setup" />
+            <AppHeader title="Tournament Setup" />
         </>
     );
 }

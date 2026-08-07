@@ -17,8 +17,5 @@ export default function PlayerList({ checkbox, name }: PlayerListProps) {
 const styles = StyleSheet.create({
     playerCard: {
         flex: 1,
-        
-        
-
     }
 })
