@@ -1,5 +1,6 @@
-import { StyleSheet, Text, View } from "react-native";
+import ActionButton from "@/components/organizer/ActionButton";
 import TeamRow from "@/components/organizer/TeamRow";
+import { StyleSheet, Text, View } from "react-native";
 
 type CourtCardProps = {
     courtNumber: number;
@@ -47,6 +48,14 @@ export default function CourtCard({
                     score={teamTwoScore}
                 />
             </View>
+
+            <View style={styles.actionArea}>
+                <ActionButton
+                    title={actionTitle}
+                    variant={variant === "dispute" ? "dispute" : "normal"}
+                    onPress={onPress}
+                />
+            </View>
         </View>
     );
 }
@@ -82,5 +91,8 @@ const styles = StyleSheet.create({
     teams: {
         gap: 12,
         marginTop: 18,
-    }
+    },
+    actionArea: {
+        marginTop: "auto",
+    },
 });

@@ -32,12 +32,13 @@ export default function SessionCard({ date, time, checkedInPlayers, totalPlayers
 }
 const styles = StyleSheet.create({
     card: {
+        width: "100%",
+        minHeight: 224,
         backgroundColor: "#FFFFFF",
-        borderRadius: 16,
-        marginTop: 5,
         borderWidth: 1,
-        borderColor: "#E5E5E5",
-        overflow: "hidden",
+        borderColor: "#E5E7EB",
+        borderRadius: 16,
+        padding: 16,
     },
 
     row: {

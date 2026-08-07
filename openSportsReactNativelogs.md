@@ -2249,3 +2249,364 @@ Push:
 ```bash
 git push
 ```
+
+---
+
+## Step 28 - Organizer Dispute Review Screen
+
+Created:
+
+```text
+app/organizer/dispute.tsx
+components/organizer/ScoreSummaryCard.tsx
+```
+
+Built the organizer dispute review screen based on the approved Figma wireframe.
+
+Implemented:
+
+- AppHeader
+- SafeAreaView
+- ScrollView
+- Recorded Score section
+- Reported Score section
+- Waiting for opponent response section
+- Dispute history badge
+- Organizer note input
+- Card based layout
+- Responsive spacing
+
+Screen structure:
+
+```tsx
+<SafeAreaView>
+    <ScrollView>
+
+        <AppHeader />
+
+        <Recorded Score />
+
+        <Reported Score />
+
+        <Waiting Response />
+
+        <Dispute Badge />
+
+        <Organizer Note />
+
+    </ScrollView>
+</SafeAreaView>
+```
+
+Created the reusable layout using:
+
+```tsx
+<SafeAreaView
+    style={styles.safeArea}
+>
+    <ScrollView
+        style={styles.scrollView}
+        contentContainerStyle={styles.content}
+        showsVerticalScrollIndicator={false}
+    >
+```
+
+Screen styling:
+
+```tsx
+safeArea: {
+    flex: 1,
+    backgroundColor: "#F9FAFB",
+},
+
+scrollView: {
+    flex: 1,
+},
+
+content: {
+    flexGrow: 1,
+    paddingHorizontal: 18,
+    paddingBottom: 24,
+},
+```
+
+---
+
+### Recorded Score
+
+Created a reusable ScoreSummaryCard component.
+
+Created:
+
+```text
+components/organizer/ScoreSummaryCard.tsx
+```
+
+Props:
+
+```tsx
+teamOne
+teamTwo
+teamOneScore
+teamTwoScore
+```
+
+Internally displays:
+
+```text
+Team One        Score
+
+Team Two        Score
+```
+
+Used inside the dispute screen:
+
+```tsx
+<ScoreSummaryCard
+    teamOne="Simon & John G."
+    teamTwo="Leo & Maria"
+    teamOneScore={5}
+    teamTwoScore={6}
+/>
+```
+
+---
+
+### Reported Score
+
+Built the reported score review card.
+
+Displays:
+
+- Reported by player
+- Correct score submitted
+- Reason for dispute
+
+Example:
+
+```tsx
+<Text>
+    Reported by Simon
+</Text>
+
+<Text>
+    Says it should be
+</Text>
+
+<Text>
+    5 - 5
+</Text>
+
+<Text>
+    Reason:
+    Point to wrong team
+</Text>
+```
+
+Used Figma styling:
+
+```text
+Background:
+#FFFBEB
+
+Border:
+#FEE685
+
+Radius:
+13
+```
+
+---
+
+### Waiting For Response
+
+Created a waiting status section informing the organizer that the opposing team has not yet responded.
+
+Example:
+
+```tsx
+<Text>
+    Leo & Maria have not responded
+</Text>
+```
+
+Used a dashed border container to match the Figma design.
+
+---
+
+### Dispute History Badge
+
+Added a reusable badge displaying dispute history.
+
+Example:
+
+```tsx
+<Ionicons
+    name="time-outline"
+/>
+
+<Text>
+    Simon: 1st dispute this session
+</Text>
+```
+
+Styled using the warning color palette from the design system.
+
+---
+
+### Organizer Notes
+
+Added an input field allowing organizers to leave notes before making a decision.
+
+Example:
+
+```tsx
+<TextInput
+    placeholder="Add a note about this decision"
+/>
+```
+
+Styled using:
+
+```text
+Height:
+50px
+
+Background:
+White
+
+Border:
+1px
+
+Radius:
+14px
+```
+
+---
+
+### Figma Design Decisions
+
+Used the component measurements from Figma.
+
+Screen:
+
+```text
+Background:
+#F9FAFB
+```
+
+Recorded Score Card:
+
+```text
+Height:
+118px
+
+Background:
+#F3F4F6
+```
+
+Reported Score Card:
+
+```text
+Height:
+122px
+
+Background:
+#FFFBEB
+
+Border:
+#FEE685
+
+Radius:
+13px
+```
+
+Waiting Response:
+
+```text
+Height:
+94px
+```
+
+Dispute Badge:
+
+```text
+Height:
+37px
+```
+
+Organizer Note:
+
+```text
+Height:
+50px
+```
+
+---
+
+### Current Organizer Flow
+
+Current navigation:
+
+```text
+Organizer Home
+
+↓
+
+Session
+
+↓
+
+Dispute Review
+
+↓
+
+Record Outcome (Next)
+
+↓
+
+Dispute Resolved
+
+↓
+
+End Session
+
+↓
+
+Final Standings
+
+↓
+
+Session Closed
+```
+
+---
+
+## Current Progress
+
+Completed:
+
+- Project setup
+- Shared Components
+- Organizer Components
+- Player Home
+- Organizer Home
+- Expo Router Navigation
+- EventCard
+- SessionCard
+- ActionRow
+- TeamRow
+- ActionButton
+- CourtCard
+- Organizer Session
+- ScoreSummaryCard
+- Organizer Dispute Review Screen
+
+Next:
+
+- Record Outcome
+- Dispute Resolved
+- End Session
+- Final Standings
+- Session Closed
+- Final UI polish
