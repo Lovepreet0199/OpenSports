@@ -13,7 +13,10 @@ export default function OrganizerSessionScreen() {
                 contentContainerStyle={styles.content}
                 showsVerticalScrollIndicator={false}
             >
-                <AppHeader title="Sessions" />
+                <AppHeader
+                    onBack={() => router.replace("/organizer")}
+                    title="Sessions"
+                />
 
                 <View style={styles.roleTabs}>
                     <Text style={styles.activeRole}>Admin</Text>

@@ -1,15 +1,24 @@
 import { Pressable, StyleSheet, Text, View } from "react-native";
+import { MaterialIcons } from "@expo/vector-icons";
+
 
 type AppHeaderProps = {
     title: string;
+    onBack?: () => void;
 };
 
-export default function AppHeader({ title }: AppHeaderProps) {
+export default function AppHeader({ title, onBack }: AppHeaderProps) {
+
+
     return (
         <>
             <View style={styles.header}>
-                <Pressable style={styles.iconButton}>
-                    <Text style={styles.icon}>&#10229;</Text>
+                <Pressable
+                    style={styles.iconButton}
+                    onPress={onBack}
+                >
+                    <MaterialIcons name="arrow-back" style={styles.icon} />
+
                 </Pressable>
 
 
@@ -56,7 +65,7 @@ const styles = StyleSheet.create({
         flex: 1,
         fontSize: 20,
         fontWeight: "700",
-        color: "1F1F1F",
+        color: "#1F1F1F",
         textAlign: "center",
     },
 });

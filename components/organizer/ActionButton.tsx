@@ -42,7 +42,7 @@ const styles = StyleSheet.create({
     button: {
         width: "100%",
         height: 55,
-        borderRadius: 13, 
+        borderRadius: 13,
         justifyContent: "center",
         alignItems: "center",
     },
@@ -58,6 +58,13 @@ const styles = StyleSheet.create({
     buttonText: {
         fontSize: 16,
         fontWeight: "700",
+        color: "#FFFFFF",
+    },
+    normalText: {
+        color: "#FFFFFF",
+    },
+
+    disputeText: {
         color: "#FFFFFF",
     },
 });

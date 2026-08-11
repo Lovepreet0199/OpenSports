@@ -2,8 +2,10 @@ import AppHeader from "@/components/shared/AppHeader";
 import { Ionicons } from "@expo/vector-icons";
 import { ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useRouter } from "expo-router";
 
 export default function DisputeScreen() {
+    const router = useRouter();
     return (
         <SafeAreaView style={styles.safeArea}>
             <ScrollView
@@ -11,7 +13,10 @@ export default function DisputeScreen() {
                 contentContainerStyle={styles.content}
                 showsVerticalScrollIndicator={false}
             >
-                <AppHeader title="Court 2 - Dispute" />
+                <AppHeader
+                    onBack={() => router.back()}
+                    title="Court 2 - Dispute"
+                />
 
                 {/* Recorded Score */}
                 <View style={styles.recordedCard}>
