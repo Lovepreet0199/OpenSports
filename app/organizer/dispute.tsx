@@ -1,8 +1,9 @@
+import DecisionButton from "@/components/organizer/DecisionButton";
 import AppHeader from "@/components/shared/AppHeader";
 import { Ionicons } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
 import { ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useRouter } from "expo-router";
 
 export default function DisputeScreen() {
     const router = useRouter();
@@ -94,6 +95,21 @@ export default function DisputeScreen() {
                     placeholder="Add a note about this decision"
                     placeholderTextColor="#99A1AF"
                 />
+                <View style={styles.acceptButton}>
+                    <DecisionButton
+                        title="Accept"
+                        variant="accept"
+                        onPress={() => { }}
+                    />
+                </View>
+
+                <View>
+                    <DecisionButton
+                        title="Reject"
+                        variant="reject"
+                        onPress={() => { }}
+                    />
+                </View>
             </ScrollView>
         </SafeAreaView>
     );
@@ -247,4 +263,7 @@ const styles = StyleSheet.create({
         fontSize: 16,
         color: "#1E2939",
     },
+    acceptButton: {
+        marginBottom: 17,
+    }
 });

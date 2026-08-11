@@ -1,66 +1,66 @@
-import { Pressable, StyleSheet, Text } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import { Pressable, StyleSheet, Text, View } from "react-native";
 
-type ActionButtonProps = {
+type ActionRowProps = {
+    iconName: keyof typeof Ionicons.glyphMap;
     title: string;
     onPress?: () => void;
-    variant?: "normal" | "dispute";
 };
 
-export default function ActionButton({
+export default function ActionRow({
+    iconName,
     title,
     onPress,
-    variant = "normal",
-}: ActionButtonProps) {
-
-    const isDispute = variant === "dispute";
-
+}: ActionRowProps) {
     return (
         <Pressable
-            style={[
-                styles.button,
-                isDispute ? styles.disputeButton : styles.normalButton,
-            ]}
+            style={styles.actionRow}
             onPress={onPress}
         >
-            <Text
-                style={[
-                    styles.buttonText,
-                    isDispute ? styles.disputeText : styles.normalText,
-                ]}
-            >
-                {title}
-            </Text>
+            <View style={styles.leftContent}>
+                <Ionicons
+                    name={iconName}
+                    size={22}
+                    color="#9B9B9B"
+                />
+
+                <Text style={styles.title}>
+                    {title}
+                </Text>
+            </View>
+
+            <Ionicons
+                name="chevron-forward"
+                size={20}
+                color="#9B9B9B"
+            />
         </Pressable>
     );
 }
 
 const styles = StyleSheet.create({
-    button: {
-        minHeight: 44,
-        borderRadius: 10,
+    actionRow: {
+        width: "100%",
+        minHeight: 55,
+        flexDirection: "row",
+        justifyContent: "space-between",
         alignItems: "center",
-        justifyContent: "center",
         paddingHorizontal: 16,
+        borderWidth: 1,
+        borderColor: "#D8D8D8",
+        borderRadius: 8,
+        backgroundColor: "#FFFFFF",
     },
 
-    normalButton: {
-        backgroundColor: "#E8F5EA",
+    leftContent: {
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 10,
     },
 
-    disputeButton: {
-        backgroundColor: "#F78D2C",
-    },
-
-    buttonText: {
-        fontSize: 16,
-        fontWeight: "700",
-    },
-
-    normalText: {
-        color: "#21652A",
-    },
-
-    disputeText: {
-        color: "#FFFFFF",
+    title: {
+        fontSize: 14,
+        fontWeight: "600",
+        color: "#1F2937",
     },
 });
