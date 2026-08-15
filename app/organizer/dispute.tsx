@@ -102,7 +102,7 @@ export default function DisputeScreen() {
                         teamOneScore={5}
                         teamTwoScore={5}
                         variant="accept"
-                        onPress={() => { }}
+                        onPress={() => router.push("/organizer/dispute-resolved")}
                     />
 
                     <DecisionButton
@@ -111,7 +111,7 @@ export default function DisputeScreen() {
                         teamOneScore={5}
                         teamTwoScore={6}
                         variant="reject"
-                        onPress={() => { }}
+                        onPress={() => router.push("/organizer/dispute-resolved")}
                     />
                 </View>
 

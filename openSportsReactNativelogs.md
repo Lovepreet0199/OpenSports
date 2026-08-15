@@ -3276,3 +3276,543 @@ After pushing, the next feature will start from:
 ```text
 Dispute Resolved
 ```
+
+---
+
+## Step 33 - Dispute Resolved Screen
+
+Created:
+
+```text
+app/organizer/dispute-resolved.tsx
+```
+
+Built the confirmation screen displayed after the organizer accepts or rejects a score dispute.
+
+The screen follows the Figma confirmation design and contains:
+
+```text
+Confirmation icon
+Dispute Resolved heading
+Confirmation message
+Back to session button
+```
+
+---
+
+### Screen Shell
+
+Created the screen using:
+
+```tsx
+import { Ionicons } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
+import {
+    Pressable,
+    StyleSheet,
+    Text,
+    View,
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+```
+
+Created the screen component:
+
+```tsx
+export default function DisputeResolvedScreen() {
+    const router = useRouter();
+
+    return (
+        <SafeAreaView style={styles.safeArea}>
+            <View style={styles.container}>
+
+                {/* Confirmation content */}
+
+            </View>
+        </SafeAreaView>
+    );
+}
+```
+
+Base screen styles:
+
+```tsx
+safeArea: {
+    flex: 1,
+    backgroundColor: "#F9FAFB",
+},
+
+container: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+},
+```
+
+Using:
+
+```tsx
+justifyContent: "center"
+```
+
+centers the confirmation vertically.
+
+Using:
+
+```tsx
+alignItems: "center"
+```
+
+centers it horizontally.
+
+---
+
+### Confirmation Icon
+
+Created the circular green confirmation icon.
+
+Code:
+
+```tsx
+<View style={styles.iconCircle}>
+    <Ionicons
+        name="checkmark"
+        size={36}
+        color="#2E903B"
+    />
+</View>
+```
+
+Styles:
+
+```tsx
+iconCircle: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: "#D1EAD4",
+    justifyContent: "center",
+    alignItems: "center",
+},
+```
+
+The Figma circle is:
+
+```text
+80px × 80px
+```
+
+Because the width and height are both 80px, using:
+
+```tsx
+borderRadius: 40
+```
+
+creates a perfect circle.
+
+The confirmation colors are:
+
+```text
+Background:
+#D1EAD4
+
+Checkmark:
+#2E903B
+```
+
+---
+
+### Confirmation Message
+
+Added the confirmation text underneath the icon.
+
+Code:
+
+```tsx
+<View style={styles.messageSection}>
+    <Text style={styles.title}>
+        Dispute Resolved
+    </Text>
+
+    <Text style={styles.message}>
+        Both teams notified. Logged in history.
+    </Text>
+</View>
+```
+
+Styles:
+
+```tsx
+messageSection: {
+    width: 257,
+    marginTop: 24,
+    gap: 12,
+},
+
+title: {
+    fontSize: 22,
+    fontWeight: "700",
+    color: "#47526C",
+    textAlign: "center",
+},
+
+message: {
+    fontSize: 14,
+    fontWeight: "400",
+    color: "#9099B0",
+    textAlign: "center",
+},
+```
+
+The heading follows the Figma typography:
+
+```text
+Size:
+22px
+
+Weight:
+700
+
+Alignment:
+Center
+```
+
+The confirmation message uses:
+
+```text
+Size:
+14px
+
+Weight:
+400
+
+Alignment:
+Center
+```
+
+---
+
+### Component Structure Fix
+
+Initially the message section was accidentally placed inside:
+
+```tsx
+<View style={styles.iconCircle}>
+```
+
+This caused the text to overlap because the parent was only:
+
+```text
+80px × 80px
+```
+
+The layout was corrected so the icon and message are siblings.
+
+Correct structure:
+
+```text
+container
+│
+├── iconCircle
+│
+└── messageSection
+```
+
+React Native:
+
+```tsx
+<View style={styles.container}>
+
+    <View style={styles.iconCircle}>
+        <Ionicons
+            name="checkmark"
+            size={36}
+            color="#2E903B"
+        />
+    </View>
+
+    <View style={styles.messageSection}>
+        <Text style={styles.title}>
+            Dispute Resolved
+        </Text>
+
+        <Text style={styles.message}>
+            Both teams notified. Logged in history.
+        </Text>
+    </View>
+
+</View>
+```
+
+This prevents the confirmation text from being constrained by the icon container.
+
+---
+
+### Back To Session Button
+
+Added the final action:
+
+```text
+Back to session
+```
+
+Code:
+
+```tsx
+<Pressable
+    style={styles.backButton}
+    onPress={() =>
+        router.replace("/organizer/session")
+    }
+>
+    <Text style={styles.backButtonText}>
+        Back to session
+    </Text>
+</Pressable>
+```
+
+Styles:
+
+```tsx
+backButton: {
+    width: 257,
+    height: 55,
+    marginTop: 24,
+    backgroundColor: "#FFFFFF",
+    borderWidth: 1,
+    borderColor: "#E1ECF1",
+    borderRadius: 13,
+    justifyContent: "center",
+    alignItems: "center",
+},
+
+backButtonText: {
+    fontSize: 18,
+    fontWeight: "600",
+    color: "#1E293B",
+    textAlign: "center",
+},
+```
+
+Figma button measurements:
+
+```text
+Width:
+257px
+
+Height:
+55px
+
+Border Radius:
+13px
+
+Background:
+#FFFFFF
+
+Border:
+#E1ECF1
+```
+
+Button typography:
+
+```text
+Font Size:
+18px
+
+Weight:
+600
+```
+
+---
+
+### Why router.replace() Was Used
+
+Navigation uses:
+
+```tsx
+router.replace("/organizer/session")
+```
+
+instead of:
+
+```tsx
+router.push("/organizer/session")
+```
+
+The resolved screen is a temporary confirmation state.
+
+Using `replace()` removes the confirmation screen from the current navigation position instead of adding another Session screen to the stack.
+
+The user returns directly to:
+
+```text
+Organizer Session
+```
+
+---
+
+## Step 34 - Connect Dispute Decisions To Resolved Screen
+
+Updated:
+
+```text
+app/organizer/dispute.tsx
+```
+
+The Accept and Reject buttons previously used:
+
+```tsx
+onPress={() => {}}
+```
+
+They were connected to:
+
+```text
+/organizer/dispute-resolved
+```
+
+Accept:
+
+```tsx
+<DecisionButton
+    title="Accept"
+    description="Score becomes"
+    teamOneScore={5}
+    teamTwoScore={5}
+    variant="accept"
+    onPress={() =>
+        router.push("/organizer/dispute-resolved")
+    }
+/>
+```
+
+Reject:
+
+```tsx
+<DecisionButton
+    title="Reject"
+    description="Score stays"
+    teamOneScore={5}
+    teamTwoScore={6}
+    variant="reject"
+    onPress={() =>
+        router.push("/organizer/dispute-resolved")
+    }
+/>
+```
+
+Both actions currently display the same resolved confirmation screen.
+
+The actual score state can be connected later when application data/state is implemented.
+
+---
+
+## Completed Dispute Flow
+
+The organizer dispute flow is now fully clickable:
+
+```text
+Organizer Session
+        ↓
+Resolve Dispute
+        ↓
+Court 2 - Dispute
+        ↓
+Accept / Reject
+        ↓
+Dispute Resolved
+        ↓
+Back to session
+        ↓
+Organizer Session
+```
+
+Implemented routes:
+
+```text
+/organizer/session
+/organizer/dispute
+/organizer/dispute-resolved
+```
+
+---
+
+## Current Progress
+
+Completed:
+
+```text
+Organizer Home
+Organizer Session
+Court Cards
+Resolve Dispute navigation
+Dispute Review
+Recorded Score
+Reported Score
+Opponent Response
+Dispute History Badge
+Organizer Note
+DecisionButton
+Accept Decision
+Reject Decision
+Dispute Resolved Confirmation
+Back to Session navigation
+```
+
+Next organizer features:
+
+```text
+Resolved Court state
+Manage Court
+Dispute History
+End Session
+Final Round
+Final Standings
+Session Closed
+```
+
+---
+
+## Git Checkpoint - Complete Dispute Flow
+
+Check the working tree:
+
+```bash
+git status
+```
+
+Review what changed:
+
+```bash
+git diff --stat
+git diff
+```
+
+Stage the current work:
+
+```bash
+git add .
+```
+
+Commit:
+
+```bash
+git commit -m "Complete organizer dispute resolution flow"
+```
+
+Push:
+
+```bash
+git push
+```
+
+This commit includes:
+
+```text
+DecisionButton
+Accept and Reject actions
+Dispute Resolved screen
+Confirmation UI
+Back to Session navigation
+Completed organizer dispute flow
+```
