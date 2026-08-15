@@ -3816,3 +3816,516 @@ Confirmation UI
 Back to Session navigation
 Completed organizer dispute flow
 ```
+
+---
+
+## Step 35 - Store Court Data in Session State
+
+Updated:
+
+```text
+app/organizer/session.tsx
+```
+
+Previously, each `CourtCard` was written separately with hardcoded data.
+
+The court information was moved into a `courts` state array:
+
+```tsx
+const [courts, setCourts] = useState([
+    {
+        courtNumber: 1,
+
+        teamOne: "Ana & Melissa",
+        teamTwo: "Katy & John K.",
+
+        teamOneScore: 10,
+        teamTwoScore: 8,
+
+        reportedTeamOneScore: 10,
+        reportedTeamTwoScore: 8,
+
+        hasDispute: false,
+    },
+    {
+        courtNumber: 2,
+
+        teamOne: "Simon & John G.",
+        teamTwo: "Leo & Maria",
+
+        teamOneScore: 5,
+        teamTwoScore: 6,
+
+        reportedTeamOneScore: 5,
+        reportedTeamTwoScore: 5,
+
+        hasDispute: true,
+    },
+    {
+        courtNumber: 3,
+
+        teamOne: "Omar & Sarah",
+        teamTwo: "Sophia & David",
+
+        teamOneScore: 4,
+        teamTwoScore: 7,
+
+        reportedTeamOneScore: 5,
+        reportedTeamTwoScore: 7,
+
+        hasDispute: true,
+    },
+]);
+```
+
+Each court now stores:
+
+```text
+Court number
+Team names
+Current score
+Reported score
+Dispute state
+```
+
+Court 1 currently has no dispute.
+
+Court 2 and Court 3 have disputes for the prototype.
+
+---
+
+## Step 36 - Generate Court Cards From Court Data
+
+Instead of manually creating three separate `CourtCard` components, the Session screen now uses:
+
+```tsx
+courts.map()
+```
+
+Code:
+
+```tsx
+<View style={styles.courts}>
+    {courts.map((court) => (
+        <CourtCard
+            key={court.courtNumber}
+            courtNumber={court.courtNumber}
+            status={
+                court.hasDispute
+                    ? "Score dispute reported"
+                    : "In progress"
+            }
+            teamOne={court.teamOne}
+            teamTwo={court.teamTwo}
+            teamOneScore={court.teamOneScore}
+            teamTwoScore={court.teamTwoScore}
+            actionTitle={
+                court.hasDispute
+                    ? "Resolve Dispute"
+                    : "Manage Court"
+            }
+            variant={
+                court.hasDispute
+                    ? "dispute"
+                    : "normal"
+            }
+            onPress={() => {
+                if (court.hasDispute) {
+                    // Open dispute
+                }
+            }}
+        />
+    ))}
+</View>
+```
+
+This allows the same `CourtCard` component to display every court.
+
+The UI is now controlled by:
+
+```tsx
+court.hasDispute
+```
+
+When:
+
+```tsx
+hasDispute: true
+```
+
+the court displays:
+
+```text
+Score dispute reported
+Resolve Dispute
+```
+
+When:
+
+```tsx
+hasDispute: false
+```
+
+the court displays:
+
+```text
+In progress
+Manage Court
+```
+
+The status and button therefore come from the same dispute state instead of being stored separately.
+
+---
+
+## Step 37 - Pass Selected Court Data to Dispute Screen
+
+Updated navigation from:
+
+```text
+app/organizer/session.tsx
+```
+
+The dispute screen previously contained information specifically for Court 2.
+
+The selected court information is now passed through Expo Router parameters.
+
+```tsx
+onPress={() => {
+    if (court.hasDispute) {
+        router.push({
+            pathname: "/organizer/dispute",
+            params: {
+                courtNumber: court.courtNumber,
+                teamOne: court.teamOne,
+                teamTwo: court.teamTwo,
+                teamOneScore: court.teamOneScore,
+                teamTwoScore: court.teamTwoScore,
+                reportedTeamOneScore:
+                    court.reportedTeamOneScore,
+                reportedTeamTwoScore:
+                    court.reportedTeamTwoScore,
+            },
+        });
+    }
+}}
+```
+
+This means one dispute screen can now be reused for different courts.
+
+Current prototype disputes:
+
+```text
+Court 2
+Court 3
+```
+
+---
+
+## Step 38 - Read Court Parameters on Dispute Screen
+
+Updated:
+
+```text
+app/organizer/dispute.tsx
+```
+
+Imported:
+
+```tsx
+import {
+    useLocalSearchParams,
+    useRouter
+} from "expo-router";
+```
+
+Received the selected court information:
+
+```tsx
+const {
+    courtNumber,
+    teamOne,
+    teamTwo,
+    teamOneScore,
+    teamTwoScore,
+    reportedTeamOneScore,
+    reportedTeamTwoScore,
+} = useLocalSearchParams();
+```
+
+The dispute screen header is now dynamic:
+
+```tsx
+<AppHeader
+    title={`Court ${courtNumber} - Dispute`}
+    onBack={() => router.back()}
+/>
+```
+
+Instead of always displaying:
+
+```text
+Court 2 - Dispute
+```
+
+the screen displays the court that the organizer selected.
+
+---
+
+## Step 39 - Make Recorded Score Dynamic
+
+Removed the hardcoded team names and scores from the Recorded Score section.
+
+Team One:
+
+```tsx
+<View style={styles.scoreRow}>
+    <Text style={styles.teamName}>
+        {String(teamOne)}
+    </Text>
+
+    <Text style={styles.smallScore}>
+        {Number(teamOneScore)}
+    </Text>
+</View>
+```
+
+Team Two:
+
+```tsx
+<View style={styles.scoreRow}>
+    <Text style={styles.teamName}>
+        {String(teamTwo)}
+    </Text>
+
+    <Text style={styles.smallScore}>
+        {Number(teamTwoScore)}
+    </Text>
+</View>
+```
+
+The same dispute screen can therefore display the recorded score for either Court 2 or Court 3.
+
+---
+
+## Step 40 - Make Reported Score Dynamic
+
+The reported score now comes from the selected court.
+
+```tsx
+<Text style={styles.reportedScore}>
+    {Number(reportedTeamOneScore)} - {Number(reportedTeamTwoScore)}
+</Text>
+```
+
+The opponent response also uses the selected team:
+
+```tsx
+<Text style={styles.responseText}>
+    {String(teamTwo)} have not responded
+</Text>
+```
+
+This removes more Court 2 specific information from the screen.
+
+---
+
+## Step 41 - Make Accept and Reject Scores Dynamic
+
+The reusable `DecisionButton` now receives the scores from the selected court.
+
+Accept uses the reported score:
+
+```tsx
+<DecisionButton
+    title="Accept"
+    description="Score becomes"
+    teamOneScore={Number(reportedTeamOneScore)}
+    teamTwoScore={Number(reportedTeamTwoScore)}
+    variant="accept"
+    onPress={() =>
+        router.push("/organizer/dispute-resolved")
+    }
+/>
+```
+
+Reject uses the current recorded score:
+
+```tsx
+<DecisionButton
+    title="Reject"
+    description="Score stays"
+    teamOneScore={Number(teamOneScore)}
+    teamTwoScore={Number(teamTwoScore)}
+    variant="reject"
+    onPress={() =>
+        router.push("/organizer/dispute-resolved")
+    }
+/>
+```
+
+Decision logic:
+
+```text
+Accept
+→ use reported score
+
+Reject
+→ keep recorded score
+```
+
+This allows the organizer to clearly see what will happen before selecting a decision.
+
+---
+
+## Step 42 - Update Court After Resolving a Dispute
+
+The dispute resolution flow was extended so the selected court can return to the Session screen as resolved.
+
+The intended state change is:
+
+```text
+Before Resolution
+
+hasDispute: true
+
+Score dispute reported
+Resolve Dispute
+```
+
+After Resolution:
+
+```text
+hasDispute: false
+
+In progress
+Manage Court
+```
+
+If the organizer accepts the dispute:
+
+```text
+Reported score becomes the court score.
+```
+
+If the organizer rejects the dispute:
+
+```text
+The original court score remains.
+```
+
+This gives the prototype a more realistic dispute resolution interaction.
+
+---
+
+## Step 43 - Prototype State Limitation
+
+The court information currently uses local React state:
+
+```tsx
+useState()
+```
+
+This project is an interactive prototype and does not currently use a backend database or persistent tournament state.
+
+Because the Session screen can be recreated during navigation, previously changed local court state may return to its initial values when another dispute is resolved.
+
+For the current prototype, this is acceptable because the main goal is to demonstrate the organizer dispute workflow.
+
+A production implementation could later store this information using:
+
+```text
+Shared application state
+API
+Database
+```
+
+The current prototype successfully demonstrates:
+
+```text
+Organizer Session
+        ↓
+Select Court With Dispute
+        ↓
+Dynamic Dispute Screen
+        ↓
+Review Recorded Score
+        ↓
+Review Reported Score
+        ↓
+Accept / Reject
+        ↓
+Dispute Resolved
+        ↓
+Back to Session
+        ↓
+Resolved Court → Manage Court
+```
+
+---
+
+## Current Progress
+
+Completed:
+
+```text
+Organizer Home
+Organizer Session
+Court Cards
+Dynamic Court Data
+Court Dispute State
+Court 2 Dispute
+Court 3 Dispute
+Dynamic Dispute Navigation
+Dynamic Recorded Scores
+Dynamic Reported Scores
+DecisionButton
+Accept Decision
+Reject Decision
+Dispute Resolved Confirmation
+Resolved Court State
+Back to Session
+Manage Court State
+```
+
+Next:
+
+```text
+Manage Court
+End Session
+Final Round
+Final Standings
+Session Closed
+Final UI polish
+```
+
+---
+
+## Git Checkpoint - Dynamic Dispute State
+
+Check changes:
+
+```bash
+git status
+git diff --stat
+git diff
+```
+
+Stage:
+
+```bash
+git add .
+```
+
+Commit:
+
+```bash
+git commit -m "Add dynamic court dispute state"
+```
+
+Push:
+
+```bash
+git push
+```
+
+---

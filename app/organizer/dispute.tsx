@@ -1,12 +1,37 @@
 import DecisionButton from "@/components/organizer/DecisionButton";
 import AppHeader from "@/components/shared/AppHeader";
 import { Ionicons } from "@expo/vector-icons";
-import { useRouter } from "expo-router";
-import { ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import {
+    ScrollView,
+    StyleSheet,
+    Text,
+    TextInput,
+    View,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function DisputeScreen() {
     const router = useRouter();
+
+    /*
+        We receive the selected court information through route parameters.
+
+        This lets us reuse ONE dispute screen for Court 2, Court 3,
+        or any future court instead of creating a separate screen
+        for every court.
+    */
+    const {
+        courtNumber,
+        teamOne,
+        teamTwo,
+        teamOneScore,
+        teamTwoScore,
+        reportedTeamOneScore,
+        reportedTeamTwoScore,
+        reportedBy,
+    } = useLocalSearchParams();
+
     return (
         <SafeAreaView style={styles.safeArea}>
             <ScrollView
@@ -14,12 +39,22 @@ export default function DisputeScreen() {
                 contentContainerStyle={styles.content}
                 showsVerticalScrollIndicator={false}
             >
+                {/*
+                    The court number is dynamic because the organizer
+                    may open this screen from any court that has a dispute.
+                */}
                 <AppHeader
+                    title={`Court ${courtNumber} - Dispute`}
                     onBack={() => router.back()}
-                    title="Court 2 - Dispute"
                 />
 
-                {/* Recorded Score */}
+                {/*
+                    The recorded score shows the score that is currently
+                    stored for the selected court.
+
+                    We keep it separate from the reported score so the
+                    organizer can compare the two before making a decision.
+                */}
                 <View style={styles.recordedCard}>
                     <Text style={styles.recordedTitle}>
                         Recorded score
@@ -28,30 +63,37 @@ export default function DisputeScreen() {
                     <View style={styles.scoreRows}>
                         <View style={styles.scoreRow}>
                             <Text style={styles.teamName}>
-                                Simon & John G.
+                                {String(teamOne)}
                             </Text>
 
                             <Text style={styles.smallScore}>
-                                5
+                                {Number(teamOneScore)}
                             </Text>
                         </View>
 
                         <View style={styles.scoreRow}>
                             <Text style={styles.teamName}>
-                                Leo & Maria
+                                {String(teamTwo)}
                             </Text>
 
                             <Text style={styles.smallScore}>
-                                6
+                                {Number(teamTwoScore)}
                             </Text>
                         </View>
                     </View>
                 </View>
 
-                {/* Reported Score */}
+                {/*
+                    The reported score is stored separately from the
+                    recorded score.
+
+                    This is important because:
+                    - Accept should use the reported score.
+                    - Reject should keep the original recorded score.
+                */}
                 <View style={styles.reportedCard}>
                     <Text style={styles.reportedTitle}>
-                        Reported by Simon
+                        Reported by {String(reportedBy)}
                     </Text>
 
                     <View style={styles.reportedScoreRow}>
@@ -60,7 +102,8 @@ export default function DisputeScreen() {
                         </Text>
 
                         <Text style={styles.reportedScore}>
-                            5 - 5
+                            {Number(reportedTeamOneScore)} -{" "}
+                            {Number(reportedTeamTwoScore)}
                         </Text>
                     </View>
 
@@ -69,14 +112,20 @@ export default function DisputeScreen() {
                     </Text>
                 </View>
 
-                {/* Opponent Response */}
+                {/*
+                    teamTwo is dynamic so this message automatically
+                    changes depending on which court is being reviewed.
+                */}
                 <View style={styles.responseCard}>
                     <Text style={styles.responseText}>
-                        Leo & Maria have not responded
+                        {String(teamTwo)} have not responded
                     </Text>
                 </View>
 
-                {/* Dispute Count Badge */}
+                {/*
+                    reportedBy is also passed from the selected court
+                    so the dispute history is not hardcoded to one player.
+                */}
                 <View style={styles.disputeBadge}>
                     <Ionicons
                         name="time-outline"
@@ -85,57 +134,117 @@ export default function DisputeScreen() {
                     />
 
                     <Text style={styles.disputeBadgeText}>
-                        Simon: 1st dispute this session
+                        {String(reportedBy)}: 1st dispute this session
                     </Text>
                 </View>
 
-                {/* Organizer Note */}
+                {/*
+                    The organizer can optionally leave a note before
+                    accepting or rejecting the dispute.
+                */}
                 <TextInput
                     style={styles.noteInput}
                     placeholder="Add a note about this decision"
                     placeholderTextColor="#99A1AF"
                 />
+
                 <View style={styles.decisions}>
+                    {/*
+                        Accept uses the REPORTED score because accepting
+                        the dispute means the player's corrected score
+                        should become the new court score.
+
+                        We also pass the court number forward so the
+                        Session screen can later know which court was resolved.
+                    */}
                     <DecisionButton
                         title="Accept"
                         description="Score becomes"
-                        teamOneScore={5}
-                        teamTwoScore={5}
+                        teamOneScore={Number(reportedTeamOneScore)}
+                        teamTwoScore={Number(reportedTeamTwoScore)}
                         variant="accept"
-                        onPress={() => router.push("/organizer/dispute-resolved")}
+                        onPress={() =>
+                            router.push({
+                                pathname: "/organizer/dispute-resolved",
+                                params: {
+                                    courtNumber: courtNumber,
+                                    decision: "accept",
+
+                                    // Accept sends the reported score.
+                                    teamOneScore: reportedTeamOneScore,
+                                    teamTwoScore: reportedTeamTwoScore,
+                                },
+                            })
+                        }
                     />
 
+                    {/*
+                        Reject keeps the ORIGINAL recorded score because
+                        the organizer is deciding that the reported score
+                        should not replace the current result.
+
+                        The same resolved screen is used, but we send the
+                        original score instead of the reported score.
+                    */}
                     <DecisionButton
                         title="Reject"
                         description="Score stays"
-                        teamOneScore={5}
-                        teamTwoScore={6}
+                        teamOneScore={Number(teamOneScore)}
+                        teamTwoScore={Number(teamTwoScore)}
                         variant="reject"
-                        onPress={() => router.push("/organizer/dispute-resolved")}
+                        onPress={() =>
+                            router.push({
+                                pathname: "/organizer/dispute-resolved",
+                                params: {
+                                    courtNumber: courtNumber,
+                                    decision: "reject",
+
+                                    // Reject keeps the original recorded score.
+                                    teamOneScore: teamOneScore,
+                                    teamTwoScore: teamTwoScore,
+                                },
+                            })
+                        }
                     />
                 </View>
-
             </ScrollView>
         </SafeAreaView>
     );
 }
 
 const styles = StyleSheet.create({
+    /*
+        SafeAreaView keeps the screen content away from areas such as
+        the iPhone Dynamic Island and system UI.
+    */
     safeArea: {
         flex: 1,
         backgroundColor: "#F9FAFB",
     },
 
+    /*
+        The dispute screen can become taller than the device because
+        it contains several cards and decision buttons, so ScrollView
+        allows the organizer to reach all content.
+    */
     scrollView: {
         flex: 1,
     },
 
+    /*
+        flexGrow allows the ScrollView content to fill the screen
+        while still being able to grow when more vertical space is needed.
+    */
     content: {
         flexGrow: 1,
         paddingHorizontal: 18,
         paddingBottom: 24,
     },
 
+    /*
+        This card represents the score currently recorded by the system.
+        Its neutral grey background separates it from the disputed score.
+    */
     recordedCard: {
         width: "100%",
         height: 118,
@@ -155,6 +264,10 @@ const styles = StyleSheet.create({
         paddingTop: 8,
     },
 
+    /*
+        Each score row places the team name on the left
+        and its score on the right.
+    */
     scoreRow: {
         flexDirection: "row",
         justifyContent: "space-between",
@@ -174,6 +287,10 @@ const styles = StyleSheet.create({
         color: "#101828",
     },
 
+    /*
+        The reported score uses the yellow warning style from Figma
+        because it represents information that needs organizer review.
+    */
     reportedCard: {
         width: "100%",
         height: 122,
@@ -204,6 +321,10 @@ const styles = StyleSheet.create({
         color: "#364153",
     },
 
+    /*
+        The reported score is larger so the organizer can quickly
+        compare it with the recorded score above.
+    */
     reportedScore: {
         fontSize: 24,
         fontWeight: "700",
@@ -217,6 +338,10 @@ const styles = StyleSheet.create({
         color: "#6A7282",
     },
 
+    /*
+        A dashed border visually communicates that the organizer
+        is still waiting for information from the opposing team.
+    */
     responseCard: {
         width: "100%",
         height: 62,
@@ -237,6 +362,10 @@ const styles = StyleSheet.create({
         textAlign: "center",
     },
 
+    /*
+        The badge gives the organizer extra context about how many
+        disputes the reporting player has made during the session.
+    */
     disputeBadge: {
         alignSelf: "flex-start",
         minHeight: 37,
@@ -256,6 +385,10 @@ const styles = StyleSheet.create({
         color: "#92400E",
     },
 
+    /*
+        The note field is kept separate from the decision buttons
+        because the organizer may want to record context before deciding.
+    */
     noteInput: {
         width: "100%",
         height: 50,
@@ -268,8 +401,13 @@ const styles = StyleSheet.create({
         fontSize: 16,
         color: "#1E2939",
     },
+
+    /*
+        gap keeps a consistent space between Accept and Reject
+        without giving each reusable DecisionButton its own margin.
+    */
     decisions: {
         gap: 16,
         marginTop: 16,
-    }
+    },
 });
