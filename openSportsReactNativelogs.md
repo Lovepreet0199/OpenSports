@@ -2610,3 +2610,669 @@ Next:
 - Final Standings
 - Session Closed
 - Final UI polish
+---
+
+## Step 29 - Functional Back Navigation
+
+Updated:
+
+```text
+components/shared/AppHeader.tsx
+```
+
+The shared `AppHeader` originally displayed a back arrow visually, but the button did not perform any navigation.
+
+Added an optional `onBack` prop so each screen can decide what should happen when the back arrow is pressed.
+
+Updated props:
+
+```tsx
+type AppHeaderProps = {
+    title: string;
+    onBack?: () => void;
+};
+```
+
+Updated the component to receive the callback:
+
+```tsx
+export default function AppHeader({
+    title,
+    onBack,
+}: AppHeaderProps) {
+```
+
+Connected the callback to the back button:
+
+```tsx
+<Pressable
+    style={styles.iconButton}
+    onPress={onBack}
+>
+    <MaterialIcons
+        name="arrow-back"
+        size={30}
+        color="#1F1F1F"
+    />
+</Pressable>
+```
+
+Used Expo Vector Icons instead of a manually typed arrow character.
+
+Import:
+
+```tsx
+import { MaterialIcons } from "@expo/vector-icons";
+```
+
+This gives the application a cleaner and more consistent back icon.
+
+Example usage inside a screen:
+
+```tsx
+<AppHeader
+    title="Court 2 - Dispute"
+    onBack={() => router.back()}
+/>
+```
+
+The screen first creates the router:
+
+```tsx
+const router = useRouter();
+```
+
+with:
+
+```tsx
+import { useRouter } from "expo-router";
+```
+
+For screens where the destination should always be known, navigation can also explicitly return to another route:
+
+```tsx
+<AppHeader
+    title="Sessions"
+    onBack={() => router.replace("/organizer")}
+/>
+```
+
+This keeps navigation responsibility inside the screen while `AppHeader` remains reusable.
+
+Current navigation pattern:
+
+```text
+Organizer Home
+      ↓
+Sessions
+      ↓
+Court 2 Dispute
+      ↑
+Back
+```
+
+---
+
+## Step 30 - Organizer DecisionButton Component
+
+Created:
+
+```text
+components/organizer/DecisionButton.tsx
+```
+
+The existing buttons did not match the Accept and Reject components from the Figma design.
+
+The organizer decision buttons are larger card-style actions that display:
+
+```text
+Decision title
+
+Description + score
+```
+
+Examples:
+
+```text
+Accept
+Score becomes 5 - 5
+```
+
+and:
+
+```text
+Reject
+Score stays 5 - 6
+```
+
+Created reusable props:
+
+```tsx
+type DecisionButtonProps = {
+    title: string;
+    description: string;
+    teamOneScore: number;
+    teamTwoScore: number;
+    onPress: () => void;
+    variant: "accept" | "reject" | "goToCourt";
+};
+```
+
+Full component:
+
+```tsx
+import { Pressable, StyleSheet, Text, View } from "react-native";
+
+type DecisionButtonProps = {
+    title: string;
+    description: string;
+    teamOneScore: number;
+    teamTwoScore: number;
+    onPress: () => void;
+    variant: "accept" | "reject" | "goToCourt";
+};
+
+export default function DecisionButton({
+    title,
+    description,
+    teamOneScore,
+    teamTwoScore,
+    onPress,
+    variant,
+}: DecisionButtonProps) {
+
+    const getButtonStyle = () => {
+        if (variant === "accept") {
+            return styles.acceptButton;
+        }
+
+        if (variant === "reject") {
+            return styles.rejectButton;
+        }
+
+        return styles.goToCourtButton;
+    };
+
+    const getTitleStyle = () => {
+        if (variant === "accept") {
+            return styles.acceptText;
+        }
+
+        if (variant === "reject") {
+            return styles.rejectText;
+        }
+
+        return styles.goToCourtText;
+    };
+
+    return (
+        <Pressable
+            style={[
+                styles.button,
+                getButtonStyle(),
+            ]}
+            onPress={onPress}
+        >
+            <View>
+                <Text
+                    style={[
+                        styles.buttonTitle,
+                        getTitleStyle(),
+                    ]}
+                >
+                    {title}
+                </Text>
+
+                <Text style={styles.descriptionText}>
+                    {description} {teamOneScore} - {teamTwoScore}
+                </Text>
+            </View>
+        </Pressable>
+    );
+}
+
+const styles = StyleSheet.create({
+    button: {
+        width: "100%",
+        height: 71,
+        borderRadius: 13,
+        borderWidth: 1,
+        justifyContent: "center",
+        alignItems: "center",
+        paddingHorizontal: 16,
+    },
+
+    acceptButton: {
+        backgroundColor: "#E8F5EA",
+        borderColor: "#C4E1C8",
+    },
+
+    rejectButton: {
+        backgroundColor: "#FCF2F2",
+        borderColor: "#FFD1CF",
+    },
+
+    goToCourtButton: {
+        backgroundColor: "#E8F5EA",
+        borderColor: "#C4E1C8",
+    },
+
+    buttonTitle: {
+        fontSize: 18,
+        fontWeight: "700",
+        textAlign: "center",
+    },
+
+    acceptText: {
+        color: "#21652A",
+    },
+
+    rejectText: {
+        color: "#B42318",
+    },
+
+    goToCourtText: {
+        color: "#21652A",
+    },
+
+    descriptionText: {
+        marginTop: 4,
+        fontSize: 15,
+        fontWeight: "600",
+        color: "#47526C",
+        textAlign: "center",
+    },
+});
+```
+
+---
+
+### DecisionButton Figma Measurements
+
+The Accept and Reject components were inspected directly from Figma.
+
+Both use:
+
+```text
+Width:
+358px
+
+Height:
+71px
+
+Border:
+1px
+```
+
+Instead of hardcoding:
+
+```tsx
+width: 358
+```
+
+the React Native component uses:
+
+```tsx
+width: "100%"
+```
+
+so it fills the available screen width responsively.
+
+The fixed height is preserved:
+
+```tsx
+height: 71
+```
+
+The title uses:
+
+```text
+18px
+```
+
+and the description / score text uses:
+
+```text
+15px
+```
+
+Both text lines are centered inside the button.
+
+---
+
+### Accept Variant
+
+Figma design uses a light green confirmation state.
+
+React Native styling:
+
+```tsx
+acceptButton: {
+    backgroundColor: "#E8F5EA",
+    borderColor: "#C4E1C8",
+},
+```
+
+Title:
+
+```tsx
+acceptText: {
+    color: "#21652A",
+},
+```
+
+Example:
+
+```text
+Accept
+Score becomes 5 - 5
+```
+
+---
+
+### Reject Variant
+
+Figma design uses a light red decision state.
+
+React Native styling:
+
+```tsx
+rejectButton: {
+    backgroundColor: "#FCF2F2",
+    borderColor: "#FFD1CF",
+},
+```
+
+Title:
+
+```tsx
+rejectText: {
+    color: "#B42318",
+},
+```
+
+Example:
+
+```text
+Reject
+Score stays 5 - 6
+```
+
+---
+
+### Future Go To Court Variant
+
+The component also prepares for the organizer's later:
+
+```text
+Go to Court
+```
+
+action.
+
+Added:
+
+```tsx
+variant: "accept" | "reject" | "goToCourt";
+```
+
+This means the same reusable component can later be used for the Go to Court action without creating another button component.
+
+---
+
+## Step 31 - Add Organizer Decisions to Dispute Screen
+
+Updated:
+
+```text
+app/organizer/dispute.tsx
+```
+
+Imported the reusable decision component:
+
+```tsx
+import DecisionButton from "@/components/organizer/DecisionButton";
+```
+
+Added Accept and Reject actions underneath the organizer note field.
+
+Code:
+
+```tsx
+<View style={styles.decisions}>
+    <DecisionButton
+        title="Accept"
+        description="Score becomes"
+        teamOneScore={5}
+        teamTwoScore={5}
+        variant="accept"
+        onPress={() => {}}
+    />
+
+    <DecisionButton
+        title="Reject"
+        description="Score stays"
+        teamOneScore={5}
+        teamTwoScore={6}
+        variant="reject"
+        onPress={() => {}}
+    />
+</View>
+```
+
+Added spacing:
+
+```tsx
+decisions: {
+    gap: 16,
+    marginTop: 16,
+},
+```
+
+The organizer can now visually choose between:
+
+```text
+Accept
+Score becomes 5 - 5
+```
+
+or:
+
+```text
+Reject
+Score stays 5 - 6
+```
+
+The button callbacks are temporarily:
+
+```tsx
+onPress={() => {}}
+```
+
+because the next step is connecting both decisions to the Dispute Resolved confirmation flow.
+
+---
+
+## Step 32 - Final Court 2 Dispute Screen Structure
+
+The completed dispute review screen now contains:
+
+```text
+Court 2 - Dispute
+
+Recorded Score
+    Simon & John G.        5
+    Leo & Maria            6
+
+Reported by Simon
+    Says it should be      5 - 5
+    Reason: Point to wrong team
+
+Opponent Response
+    Leo & Maria have not responded
+
+Dispute History
+    Simon: 1st dispute this session
+
+Organizer Note
+    Add a note about this decision
+
+Organizer Decision
+    Accept
+    Score becomes 5 - 5
+
+    Reject
+    Score stays 5 - 6
+```
+
+Current screen component structure:
+
+```text
+DisputeScreen
+│
+├── AppHeader
+│
+├── Recorded Score Card
+│
+├── Reported Score Card
+│
+├── Opponent Response Card
+│
+├── Dispute History Badge
+│
+├── TextInput
+│
+├── DecisionButton
+│     └── Accept
+│
+└── DecisionButton
+      └── Reject
+```
+
+This completes the main UI for the organizer dispute decision screen.
+
+---
+
+## Updated Organizer Flow
+
+Current working flow:
+
+```text
+Organizer Home
+      ↓
+Let's Start
+      ↓
+Organizer Session
+      ↓
+Resolve Dispute
+      ↓
+Court 2 - Dispute
+      ↓
+Accept / Reject
+      ↓
+Dispute Resolved (Next)
+```
+
+---
+
+## Current Progress
+
+Completed:
+
+```text
+Project Setup
+Expo Router
+Safe Area support
+Player Home
+Organizer Home
+Shared AppHeader
+Shared AppButton
+EventCard
+SessionCard
+ActionRow
+TeamRow
+ActionButton
+CourtCard
+Organizer Session
+ScoreSummaryCard
+Organizer Dispute Review
+Functional Back Navigation
+Expo Vector Icon Back Arrow
+DecisionButton
+Accept UI
+Reject UI
+Organizer Decision Section
+```
+
+Next:
+
+```text
+Dispute Resolved
+Back to Session after resolution
+Resolved Court state
+Manage Court
+Dispute History
+End Session
+Final Round
+Final Standings
+Session Closed
+Final UI polish
+```
+
+---
+
+## Git Checkpoint - Organizer Session and Dispute UI
+
+Before committing, check the changed files:
+
+```bash
+git status
+```
+
+Review the changes:
+
+```bash
+git diff
+```
+
+Optional quick summary:
+
+```bash
+git diff --stat
+```
+
+Stage the current work:
+
+```bash
+git add .
+```
+
+Commit:
+
+```bash
+git commit -m "Build organizer dispute decision flow"
+```
+
+Push:
+
+```bash
+git push
+```
+
+This checkpoint includes:
+
+```text
+Organizer Session
+CourtCard updates
+ActionButton
+Back navigation
+Dispute review screen
+DecisionButton
+Accept and Reject UI
+```
+
+After pushing, the next feature will start from:
+
+```text
+Dispute Resolved
+```

@@ -5,6 +5,7 @@ import { StatusBar } from 'expo-status-bar';
 import 'react-native-reanimated';
 
 import { useColorScheme } from '@/hooks/use-color-scheme';
+import { View } from 'react-native';
 
 // export const unstable_settings = {
 //   anchor: 'player',
@@ -13,10 +14,11 @@ import { useColorScheme } from '@/hooks/use-color-scheme';
 
 export default function OrganizerLayout() {
   return (
-    <Stack
-      screenOptions={{
-        headerShown: false,
-      }}
-    />
+        <Stack
+          screenOptions={{
+            headerShown: false,
+          }}
+        />
+   
   );
 }

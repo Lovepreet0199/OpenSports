@@ -2,14 +2,20 @@ import { Pressable, StyleSheet, Text, View } from "react-native";
 
 type DecisionButtonProps = {
     title: string;
+    description: string;
+    teamOneScore: number;
+    teamTwoScore: number;
     onPress: () => void;
     variant: "accept" | "reject" | "goToCourt";
-}
+};
 
 export default function DecisionButton({
     title,
+    description,
+    teamOneScore,
+    teamTwoScore,
     onPress,
-    variant
+    variant,
 }: DecisionButtonProps) {
 
     const getButtonStyle = () => {
@@ -21,50 +27,87 @@ export default function DecisionButton({
             return styles.rejectButton;
         }
 
-        if (variant === "goToCourt") {
-            return styles.goToCourtButton;
+        return styles.goToCourtButton;
+    };
+
+    const getTitleStyle = () => {
+        if (variant === "accept") {
+            return styles.acceptText;
         }
-    }
+
+        if (variant === "reject") {
+            return styles.rejectText;
+        }
+
+        return styles.goToCourtText;
+    };
 
     return (
         <Pressable
             style={[styles.button, getButtonStyle()]}
             onPress={onPress}
         >
-            <Text style={styles.buttonText}>
-                {title}
-            </Text>
+            <View>
+                <Text style={[styles.buttonTitle, getTitleStyle()]}>
+                    {title}
+                </Text>
+
+
+                <Text style={styles.descriptionText}>
+                    {description} {teamOneScore} - {teamTwoScore}
+                </Text>
+            </View>
         </Pressable>
     );
-
 }
 
 const styles = StyleSheet.create({
     button: {
         width: "100%",
-        height: 55,
+        height: 71,
         borderRadius: 13,
+        borderWidth: 1,
         justifyContent: "center",
         alignItems: "center",
+        paddingHorizontal: 16,
     },
 
     acceptButton: {
-        backgroundColor: "#2E903B",
+        backgroundColor: "#E8F5EA",
+        borderColor: "#C4E1C8",
     },
 
     rejectButton: {
-        backgroundColor: "#F78D2C",
-
+        backgroundColor: "#FCF2F2",
+        borderColor: "#FFD1CF",
     },
 
     goToCourtButton: {
-        backgroundColor: "#2E903B",
-
+        backgroundColor: "#E8F5EA",
+        borderColor: "#C4E1C8",
+    },
+    acceptText: {
+        color: "#21652A",
     },
 
-    buttonText: {
-        fontSize: 16,
+    rejectText: {
+        color: "#B42318",
+    },
+
+    goToCourtText: {
+        color: "#21652A",
+    },
+    buttonTitle: {
+        fontSize: 18,
         fontWeight: "700",
-        color: "#FFFFFF",
+        textAlign: "center",
+    },
+
+    descriptionText: {
+        marginTop: 4,
+        fontSize: 15,
+        fontWeight: "600",
+        color: "#47526C",
+        textAlign: "center",
     },
 });

@@ -95,21 +95,26 @@ export default function DisputeScreen() {
                     placeholder="Add a note about this decision"
                     placeholderTextColor="#99A1AF"
                 />
-                <View style={styles.acceptButton}>
+                <View style={styles.decisions}>
                     <DecisionButton
                         title="Accept"
+                        description="Score becomes"
+                        teamOneScore={5}
+                        teamTwoScore={5}
                         variant="accept"
                         onPress={() => { }}
                     />
-                </View>
 
-                <View>
                     <DecisionButton
                         title="Reject"
+                        description="Score stays"
+                        teamOneScore={5}
+                        teamTwoScore={6}
                         variant="reject"
                         onPress={() => { }}
                     />
                 </View>
+
             </ScrollView>
         </SafeAreaView>
     );
@@ -263,7 +268,8 @@ const styles = StyleSheet.create({
         fontSize: 16,
         color: "#1E2939",
     },
-    acceptButton: {
-        marginBottom: 17,
+    decisions: {
+        gap: 16,
+        marginTop: 16,
     }
 });
