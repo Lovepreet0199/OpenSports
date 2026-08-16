@@ -4,6 +4,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import CourtCard from "@/components/organizer/CourtCard";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
+import AppButton from "@/components/shared/AppButton";
 
 export default function OrganizerSessionScreen() {
     const router = useRouter();
@@ -307,6 +308,22 @@ export default function OrganizerSessionScreen() {
                             }}
                         />
                     ))}
+
+                    {/*
+                        The End Session button is placed after all active courts.
+
+                        This allows the organizer to finish the current round/session
+                        once court activity has been reviewed.
+                    */}
+                    <View style={styles.endSessionButton}>
+                        <AppButton
+                            title="End session"
+                            variant="danger"
+                            onPress={() =>
+                                router.push("/organizer/end-session")
+                            }
+                        />
+                    </View>
                 </View>
             </ScrollView>
         </SafeAreaView>
@@ -387,5 +404,11 @@ const styles = StyleSheet.create({
     */
     courts: {
         gap: 14,
+    },
+    
+    endSessionButton: {
+        marginTop: 24,
+        paddingHorizontal: 22,
+        paddingBottom: 12,
     },
 });

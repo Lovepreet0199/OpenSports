@@ -5402,3 +5402,442 @@ git push
 ```
 
 ---
+
+## Step 64 - Add Danger Variant to AppButton
+
+Updated:
+
+```text
+components/shared/AppButton.tsx
+```
+
+The organizer needs a red button for actions such as ending a session.
+
+The existing `AppButton` component supported primary and secondary buttons.
+
+Added a third variant:
+
+```tsx
+variant?: "primary" | "secondary" | "danger";
+```
+
+Added danger button styles:
+
+```tsx
+dangerButton: {
+    backgroundColor: "#E64543",
+},
+
+dangerText: {
+    color: "#FFFFFF",
+},
+```
+
+The component now selects the correct button and text styles based on the selected variant.
+
+```tsx
+const buttonStyle =
+    variant === "primary"
+        ? styles.primaryButton
+        : variant === "danger"
+            ? styles.dangerButton
+            : styles.secondaryButton;
+
+const textStyle =
+    variant === "primary"
+        ? styles.primaryText
+        : variant === "danger"
+            ? styles.dangerText
+            : styles.secondaryText;
+```
+
+The reusable button now supports:
+
+```text
+Primary   → Green
+Secondary → White
+Danger    → Red
+```
+
+Example:
+
+```tsx
+<AppButton
+    title="End session"
+    variant="danger"
+    onPress={() => {}}
+/>
+```
+
+---
+
+## Step 65 - Add End Session Button
+
+Updated:
+
+```text
+app/organizer/session.tsx
+```
+
+Added the End Session button to the organizer Sessions screen.
+
+The button uses the new danger variant:
+
+```tsx
+<AppButton
+    title="End session"
+    variant="danger"
+    onPress={() =>
+        router.push("/organizer/end-session")
+    }
+/>
+```
+
+The button is placed at the bottom of the session content.
+
+Wrapper:
+
+```tsx
+<View style={styles.endSessionButton}>
+    <AppButton
+        title="End session"
+        variant="danger"
+        onPress={() =>
+            router.push("/organizer/end-session")
+        }
+    />
+</View>
+```
+
+The red button matches the destructive action styling from the Figma design.
+
+The button does not immediately end the session.
+
+Instead, it opens a confirmation screen first.
+
+Flow:
+
+```text
+Sessions
+↓
+End Session
+↓
+Confirmation
+```
+
+---
+
+## Step 66 - End Session Confirmation Screen
+
+Created:
+
+```text
+app/organizer/end-session.tsx
+```
+
+Created the confirmation screen shown before the organizer ends the session.
+
+The screen contains:
+
+```text
+Red warning icon
+
+Are you sure?
+
+Both teams will be notified.
+
+Go back     End session
+```
+
+The warning icon uses:
+
+```tsx
+<Ionicons
+    name="alert-circle-outline"
+    size={40}
+    color="#EE3835"
+/>
+```
+
+The icon is placed inside a light red circle:
+
+```tsx
+iconCircle: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: "#FAE2E1",
+    justifyContent: "center",
+    alignItems: "center",
+},
+```
+
+Two actions are available.
+
+### Go Back
+
+Cancels the action:
+
+```tsx
+onPress={() => router.back()}
+```
+
+This returns the organizer to the Sessions screen.
+
+### End Session
+
+Confirms the action:
+
+```tsx
+onPress={() =>
+    router.replace("/organizer/session-ended")
+}
+```
+
+`router.replace()` is used because once the session has ended, the organizer should not return to the confirmation screen through normal back navigation.
+
+Flow:
+
+```text
+Sessions
+↓
+End Session
+↓
+Are you sure?
+├── Go back → Sessions
+└── End session → Session Ended
+```
+
+---
+
+## Step 67 - Session Ended Confirmation Screen
+
+Created:
+
+```text
+app/organizer/session-ended.tsx
+```
+
+Created the final confirmation screen shown after the organizer successfully ends the session.
+
+The screen displays:
+
+```text
+Green check icon
+
+Session ended
+
+All scores logged.
+```
+
+The confirmation icon uses:
+
+```tsx
+<Ionicons
+    name="checkmark"
+    size={36}
+    color="#2E903B"
+/>
+```
+
+The icon is placed inside the same green confirmation style used by other success screens:
+
+```tsx
+iconCircle: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: "#D1EAD4",
+    justifyContent: "center",
+    alignItems: "center",
+},
+```
+
+The screen does not require another button.
+
+It acts as a temporary success state before returning the organizer to the main organizer screen.
+
+---
+
+## Step 68 - Automatically Return to Organizer Home
+
+Updated:
+
+```text
+app/organizer/session-ended.tsx
+```
+
+The Session Ended screen automatically returns the organizer to the organizer home screen after a short delay.
+
+Imported:
+
+```tsx
+import { useEffect } from "react";
+```
+
+Added:
+
+```tsx
+useEffect(() => {
+    const timer = setTimeout(() => {
+        router.replace("/organizer");
+    }, 1500);
+
+    return () => clearTimeout(timer);
+}, [router]);
+```
+
+The timer waits:
+
+```text
+1500 milliseconds
+=
+1.5 seconds
+```
+
+This gives the organizer enough time to see the confirmation message before returning to the main organizer screen.
+
+The cleanup function:
+
+```tsx
+return () => clearTimeout(timer);
+```
+
+clears the timer if the screen is removed before the timer finishes.
+
+The final End Session flow is:
+
+```text
+Sessions
+↓
+End Session
+↓
+Are you sure?
+↓
+End session
+↓
+Session ended
+↓
+Wait 1.5 seconds
+↓
+Organizer Home
+```
+
+`router.replace()` is used instead of `router.push()` so the completed session screens are not added back into the navigation history.
+
+---
+
+## Current Organizer End Session Flow
+
+```text
+Organizer Home
+↓
+Let's Start
+↓
+Sessions
+↓
+Manage Courts / Resolve Disputes
+↓
+End Session
+↓
+End Session Confirmation
+↓
+Session Ended
+↓
+Automatic Redirect
+↓
+Organizer Home
+```
+
+---
+
+## Concepts Used
+
+### Danger Button Variant
+
+The reusable `AppButton` now supports:
+
+```text
+primary
+secondary
+danger
+```
+
+This avoids creating a separate button component just for destructive actions.
+
+### Confirmation Before Important Actions
+
+Ending a session requires confirmation to prevent accidental taps.
+
+```text
+End Session
+↓
+Confirmation
+↓
+Session Ended
+```
+
+### setTimeout()
+
+Used to delay navigation:
+
+```tsx
+setTimeout(() => {
+    router.replace("/organizer");
+}, 1500);
+```
+
+### useEffect()
+
+Used to start the timer when the Session Ended screen loads.
+
+### clearTimeout()
+
+Used to clean up the timer when the component is removed.
+
+### router.replace()
+
+Used after completing the session so completed confirmation screens are removed from the normal navigation flow.
+
+---
+
+## Git Checkpoint - End Session Flow
+
+Check changes:
+
+```bash
+git status
+git diff --stat
+git diff
+```
+
+Stage:
+
+```bash
+git add app components
+```
+
+Commit:
+
+```bash
+git commit -m "Add organizer end session flow"
+```
+
+Push:
+
+```bash
+git push
+```
+
+---
+
+## Next Steps
+
+```text
+Finish Match
+Final Round
+Final Standings
+Session Closed
+Final UI polish
+Full navigation testing
+```

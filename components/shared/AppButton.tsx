@@ -3,7 +3,7 @@ import { Pressable, StyleSheet, Text } from "react-native";
 type AppButtonProps = {
     title: string;
     onPress: () => void;
-    variant?: "primary" | "secondary";
+    variant?: "primary" | "secondary" | "danger";
 };
 
 export default function AppButton({
@@ -12,27 +12,46 @@ export default function AppButton({
     variant = "primary",
 }: AppButtonProps) {
 
-    const isPrimary = variant === "primary";
+    /*
+        Choose the button and text styles based on the variant.
+
+        This lets the same reusable AppButton support:
+        - primary actions
+        - secondary actions
+        - destructive actions such as End session
+    */
+    const buttonStyle =
+        variant === "primary"
+            ? styles.primaryButton
+            : variant === "danger"
+                ? styles.dangerButton
+                : styles.secondaryButton;
+
+    const textStyle =
+        variant === "primary"
+            ? styles.primaryText
+            : variant === "danger"
+                ? styles.dangerText
+                : styles.secondaryText;
 
     return (
-
         <Pressable
             style={[
                 styles.button,
-                isPrimary ? styles.primaryButton : styles.secondaryButton,
+                buttonStyle,
             ]}
-            onPress={onPress}>
+            onPress={onPress}
+        >
             <Text
                 style={[
                     styles.buttonText,
-                    isPrimary ? styles.primaryText : styles.secondaryText,
-                ]}>
+                    textStyle,
+                ]}
+            >
                 {title}
             </Text>
         </Pressable>
-
     );
-
 }
 
 const styles = StyleSheet.create({
@@ -54,6 +73,10 @@ const styles = StyleSheet.create({
         borderColor: "#E2E2E2",
     },
 
+    dangerButton: {
+        backgroundColor: "#E64543",
+    },
+
     buttonText: {
         fontSize: 18,
         fontWeight: "700",
@@ -65,5 +88,9 @@ const styles = StyleSheet.create({
 
     secondaryText: {
         color: "#111111",
+    },
+
+    dangerText: {
+        color: "#FFFFFF",
     },
 });
