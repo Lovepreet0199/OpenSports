@@ -85,9 +85,7 @@ export default function OrganizerHomeScreen() {
                     <ActionRow
                         iconName="people-outline"
                         title="Set up teams"
-                        onPress={() =>
-                            router.push("/organizer/setupteams")
-                        }
+                        onPress={() => router.push("/player/widgets")}
                     />
                 </View>
 
@@ -124,6 +122,8 @@ export default function OrganizerHomeScreen() {
                         }
                     />
                 </View>
+
+
             </ScrollView>
         </SafeAreaView>
     );
