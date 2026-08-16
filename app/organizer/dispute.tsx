@@ -1,4 +1,5 @@
 import DecisionButton from "@/components/organizer/DecisionButton";
+import AppButton from "@/components/shared/AppButton";
 import AppHeader from "@/components/shared/AppHeader";
 import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -30,7 +31,10 @@ export default function DisputeScreen() {
         reportedTeamOneScore,
         reportedTeamTwoScore,
         reportedBy,
+        isContested,
     } = useLocalSearchParams();
+
+    const contested = isContested === "true";
 
     return (
         <SafeAreaView style={styles.safeArea}>
@@ -116,11 +120,38 @@ export default function DisputeScreen() {
                     teamTwo is dynamic so this message automatically
                     changes depending on which court is being reviewed.
                 */}
-                <View style={styles.responseCard}>
-                    <Text style={styles.responseText}>
-                        {String(teamTwo)} have not responded
-                    </Text>
-                </View>
+                {/*
+    Court 2 has no opponent response, while Court 3 was contested.
+
+    isContested lets us reuse this same screen for both situations.
+*/}
+                {contested ? (
+                    <View style={styles.reviewedCard}>
+                        <Text style={styles.reviewedTitle}>
+                            Reviewed by David
+                        </Text>
+
+                        <View style={styles.reviewedScoreRow}>
+                            <Text style={styles.reviewedLabel}>
+                                Says it should be
+                            </Text>
+
+                            <Text style={styles.reviewedScore}>
+                                {Number(teamOneScore)} - {Number(teamTwoScore)}
+                            </Text>
+                        </View>
+
+                        <Text style={styles.reviewedReason}>
+                            Reason: Score is correct as recorded
+                        </Text>
+                    </View>
+                ) : (
+                    <View style={styles.responseCard}>
+                        <Text style={styles.responseText}>
+                            {String(teamTwo)} have not responded
+                        </Text>
+                    </View>
+                )}
 
                 {/*
                     reportedBy is also passed from the selected court
@@ -142,73 +173,80 @@ export default function DisputeScreen() {
                     The organizer can optionally leave a note before
                     accepting or rejecting the dispute.
                 */}
-                <TextInput
-                    style={styles.noteInput}
-                    placeholder="Add a note about this decision"
-                    placeholderTextColor="#99A1AF"
-                />
+                {!contested && (
+                    <>
+                        <TextInput
+                            style={styles.noteInput}
+                            placeholder="Add a note about this decision"
+                            placeholderTextColor="#99A1AF"
+                        />
 
-                <View style={styles.decisions}>
-                    {/*
-                        Accept uses the REPORTED score because accepting
-                        the dispute means the player's corrected score
-                        should become the new court score.
+                        <View style={styles.decisions}>
+                            <DecisionButton
+                                title="Accept"
+                                description="Score becomes"
+                                teamOneScore={Number(reportedTeamOneScore)}
+                                teamTwoScore={Number(reportedTeamTwoScore)}
+                                variant="accept"
+                                onPress={() =>
+                                    router.push({
+                                        pathname: "/organizer/dispute-resolved",
+                                        params: {
+                                            courtNumber: courtNumber,
+                                            decision: "accept",
+                                            teamOneScore: reportedTeamOneScore,
+                                            teamTwoScore: reportedTeamTwoScore,
+                                        },
+                                    })
+                                }
+                            />
 
-                        We also pass the court number forward so the
-                        Session screen can later know which court was resolved.
-                    */}
-                    <DecisionButton
-                        title="Accept"
-                        description="Score becomes"
-                        teamOneScore={Number(reportedTeamOneScore)}
-                        teamTwoScore={Number(reportedTeamTwoScore)}
-                        variant="accept"
-                        onPress={() =>
-                            router.push({
-                                pathname: "/organizer/dispute-resolved",
-                                params: {
-                                    courtNumber: courtNumber,
-                                    decision: "accept",
+                            <DecisionButton
+                                title="Reject"
+                                description="Score stays"
+                                teamOneScore={Number(teamOneScore)}
+                                teamTwoScore={Number(teamTwoScore)}
+                                variant="reject"
+                                onPress={() =>
+                                    router.push({
+                                        pathname: "/organizer/dispute-resolved",
+                                        params: {
+                                            courtNumber: courtNumber,
+                                            decision: "reject",
+                                            teamOneScore: teamOneScore,
+                                            teamTwoScore: teamTwoScore,
+                                        },
+                                    })
+                                }
+                            />
+                        </View>
+                    </>
+                )}
 
-                                    // Accept sends the reported score.
-                                    teamOneScore: reportedTeamOneScore,
-                                    teamTwoScore: reportedTeamTwoScore,
-                                },
-                            })
-                        }
-                    />
-
-                    {/*
-                        Reject keeps the ORIGINAL recorded score because
-                        the organizer is deciding that the reported score
-                        should not replace the current result.
-
-                        The same resolved screen is used, but we send the
-                        original score instead of the reported score.
-                    */}
-                    <DecisionButton
-                        title="Reject"
-                        description="Score stays"
-                        teamOneScore={Number(teamOneScore)}
-                        teamTwoScore={Number(teamTwoScore)}
-                        variant="reject"
-                        onPress={() =>
-                            router.push({
-                                pathname: "/organizer/dispute-resolved",
-                                params: {
-                                    courtNumber: courtNumber,
-                                    decision: "reject",
-
-                                    // Reject keeps the original recorded score.
-                                    teamOneScore: teamOneScore,
-                                    teamTwoScore: teamTwoScore,
-                                },
-                            })
-                        }
-                    />
-                </View>
+                {contested && (
+                    <View style={styles.goToCourtButton}>
+                        <AppButton
+                            title="Go to court to decide"
+                            variant="primary"
+                            onPress={() =>
+                                router.push({
+                                    pathname: "/organizer/record-outcome",
+                                    params: {
+                                        courtNumber: courtNumber,
+                                        teamOne: teamOne,
+                                        teamTwo: teamTwo,
+                                        teamOneScore: teamOneScore,
+                                        teamTwoScore: teamTwoScore,
+                                        reportedTeamOneScore: reportedTeamOneScore,
+                                        reportedTeamTwoScore: reportedTeamTwoScore,
+                                    },
+                                })
+                            }
+                        />
+                    </View>
+                )}
             </ScrollView>
-        </SafeAreaView>
+        </SafeAreaView >
     );
 }
 
@@ -409,5 +447,61 @@ const styles = StyleSheet.create({
     decisions: {
         gap: 16,
         marginTop: 16,
+    },
+    /*
+    Court 3 uses this card because the opponent has contested
+    the original dispute. The purple styling separates the
+    opponent's response from the original yellow dispute card.
+*/
+    reviewedCard: {
+        width: "100%",
+        marginTop: 18,
+        padding: 16,
+        backgroundColor: "#F5F3FF",
+        borderWidth: 1,
+        borderColor: "#DDD6FE",
+        borderRadius: 13,
+    },
+
+    reviewedTitle: {
+        fontSize: 17,
+        fontWeight: "600",
+        color: "#7248E3",
+    },
+
+    reviewedScoreRow: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: "center",
+        paddingTop: 8,
+    },
+
+    reviewedLabel: {
+        fontSize: 17,
+        fontWeight: "500",
+        color: "#364153",
+    },
+
+    reviewedScore: {
+        fontSize: 24,
+        fontWeight: "700",
+        color: "#101828",
+    },
+
+    reviewedReason: {
+        paddingTop: 4,
+        fontSize: 14,
+        fontWeight: "400",
+        color: "#6A7282",
+    },
+
+    /*
+        This button is only shown when both teams disagree.
+        Instead of Accept/Reject, the organizer goes to the court
+        and records the final outcome.
+    */
+    goToCourtButton: {
+        marginTop: "auto",
+        paddingTop: 24,
     },
 });

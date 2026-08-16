@@ -4329,3 +4329,1076 @@ git push
 ```
 
 ---
+
+---
+
+## Step 44 - Add Manage Court Navigation
+
+Updated:
+
+```text
+app/organizer/session.tsx
+```
+
+The Session screen previously only opened the dispute screen when a court had an active dispute.
+
+Normal courts now open:
+
+```text
+/organizer/manage-court
+```
+
+The selected court information is passed through Expo Router:
+
+```tsx
+onPress={() => {
+    if (court.hasDispute) {
+        router.push({
+            pathname: "/organizer/dispute",
+            params: {
+                courtNumber: court.courtNumber,
+                teamOne: court.teamOne,
+                teamTwo: court.teamTwo,
+                teamOneScore: court.teamOneScore,
+                teamTwoScore: court.teamTwoScore,
+                reportedTeamOneScore: court.reportedTeamOneScore,
+                reportedTeamTwoScore: court.reportedTeamTwoScore,
+                reportedBy: court.reportedBy,
+                isContested: String(court.isContested),
+            },
+        });
+    } else {
+        router.push({
+            pathname: "/organizer/manage-court",
+            params: {
+                courtNumber: court.courtNumber,
+                teamOne: court.teamOne,
+                teamTwo: court.teamTwo,
+                teamOneScore: court.teamOneScore,
+                teamTwoScore: court.teamTwoScore,
+                reportedTeamOneScore: court.reportedTeamOneScore,
+                reportedTeamTwoScore: court.reportedTeamTwoScore,
+                reportedBy: court.reportedBy,
+                isContested: String(court.isContested),
+                reviewedBy: court.reviewedBy,
+            },
+        });
+    }
+}}
+```
+
+This allows one Session screen to decide between:
+
+```text
+hasDispute = true
+→ Resolve Dispute
+
+hasDispute = false
+→ Manage Court
+```
+
+---
+
+## Step 45 - Create Reusable ScoreControl Component
+
+Created:
+
+```text
+components/organizer/ScoreControl.tsx
+```
+
+The Manage Court and Record Outcome screens both require the same:
+
+```text
+Minus
+Score
+Plus
+```
+
+control.
+
+A reusable component was created instead of duplicating the same buttons.
+
+Props:
+
+```tsx
+type ScoreControlProps = {
+    score: number;
+    onDecrease: () => void;
+    onIncrease: () => void;
+};
+```
+
+Example structure:
+
+```tsx
+<View style={styles.container}>
+    <Pressable
+        style={styles.decreaseButton}
+        onPress={onDecrease}
+    >
+        <Ionicons
+            name="remove"
+            size={20}
+            color="#364153"
+        />
+    </Pressable>
+
+    <Text style={styles.score}>
+        {score}
+    </Text>
+
+    <Pressable
+        style={styles.increaseButton}
+        onPress={onIncrease}
+    >
+        <Ionicons
+            name="add"
+            size={20}
+            color="#FFFFFF"
+        />
+    </Pressable>
+</View>
+```
+
+The score state stays inside the parent screen.
+
+`ScoreControl` is only responsible for:
+
+```text
+Displaying the score
+Calling decrease
+Calling increase
+```
+
+---
+
+## Step 46 - Build Manage Court Screen
+
+Created:
+
+```text
+app/organizer/manage-court.tsx
+```
+
+The Manage Court screen receives the selected court using:
+
+```tsx
+const {
+    courtNumber,
+    teamOne,
+    teamTwo,
+    teamOneScore,
+    teamTwoScore,
+    reportedTeamOneScore,
+    reportedTeamTwoScore,
+    reportedBy,
+    isContested,
+    reviewedBy,
+} = useLocalSearchParams();
+```
+
+The current scores are copied into local state:
+
+```tsx
+const [scoreOne, setScoreOne] = useState(
+    Number(teamOneScore)
+);
+
+const [scoreTwo, setScoreTwo] = useState(
+    Number(teamTwoScore)
+);
+```
+
+State is required because the organizer can edit the scores before saving.
+
+---
+
+## Step 47 - Add Score Editing to Manage Court
+
+Added two reusable `ScoreControl` components.
+
+Team One:
+
+```tsx
+<ScoreControl
+    score={scoreOne}
+    onDecrease={() => {
+        if (scoreOne > 0) {
+            setScoreOne(scoreOne - 1);
+        }
+    }}
+    onIncrease={() => {
+        if (scoreOne < 11) {
+            setScoreOne(scoreOne + 1);
+        }
+    }}
+/>
+```
+
+Team Two:
+
+```tsx
+<ScoreControl
+    score={scoreTwo}
+    onDecrease={() => {
+        if (scoreTwo > 0) {
+            setScoreTwo(scoreTwo - 1);
+        }
+    }}
+    onIncrease={() => {
+        if (scoreTwo < 11) {
+            setScoreTwo(scoreTwo + 1);
+        }
+    }}
+/>
+```
+
+The prototype score limits are:
+
+```text
+Minimum: 0
+Maximum: 11
+```
+
+This prevents:
+
+```text
+Negative scores
+Scores above 11
+```
+
+---
+
+## Step 48 - Create CourtActionRow Component
+
+Created:
+
+```text
+components/organizer/CourtActionRow.tsx
+```
+
+Both Manage Court actions use the same row layout:
+
+```text
+Finish match
+Dispute history
+```
+
+The component receives:
+
+```tsx
+type CourtActionRowProps = {
+    title: string;
+    onPress: () => void;
+};
+```
+
+The reusable row contains:
+
+```text
+Action title
+Chevron icon
+Press behavior
+```
+
+This avoids repeating the same layout inside Manage Court.
+
+---
+
+## Step 49 - Add Court Actions
+
+Updated:
+
+```text
+app/organizer/manage-court.tsx
+```
+
+Added a separate:
+
+```text
+Court actions
+```
+
+card below the score card.
+
+Actions:
+
+```text
+Finish match
+Dispute history
+```
+
+Example:
+
+```tsx
+<CourtActionRow
+    title="Finish match"
+    onPress={() => {
+        // Finish Match flow will be connected later.
+    }}
+/>
+
+<View style={styles.divider} />
+
+<CourtActionRow
+    title="Dispute history"
+    onPress={() =>
+        router.push({
+            pathname: "/organizer/dispute-history",
+            params: {
+                courtNumber: courtNumber,
+                teamOne: teamOne,
+                teamTwo: teamTwo,
+
+                recordedTeamOneScore: teamOneScore,
+                recordedTeamTwoScore: teamTwoScore,
+
+                reportedTeamOneScore: reportedTeamOneScore,
+                reportedTeamTwoScore: reportedTeamTwoScore,
+
+                finalTeamOneScore: scoreOne,
+                finalTeamTwoScore: scoreTwo,
+
+                reportedBy: reportedBy,
+                isContested: isContested,
+                reviewedBy: reviewedBy,
+            },
+        })
+    }
+/>
+```
+
+The actions are kept outside the score card because they are separate sections in the Figma design.
+
+---
+
+## Step 50 - Save Updated Court Score
+
+Added:
+
+```text
+Save changes
+```
+
+to Manage Court.
+
+Code:
+
+```tsx
+<AppButton
+    title="Save changes"
+    variant="primary"
+    onPress={() =>
+        router.replace({
+            pathname: "/organizer/session",
+            params: {
+                resolvedCourt: courtNumber,
+                resolvedTeamOneScore: scoreOne,
+                resolvedTeamTwoScore: scoreTwo,
+            },
+        })
+    }
+/>
+```
+
+The updated score is returned to Session through route parameters.
+
+Flow:
+
+```text
+Manage Court
+      ↓
+Change score
+      ↓
+Save changes
+      ↓
+Session
+      ↓
+Update selected CourtCard
+```
+
+---
+
+## Step 51 - Add Dispute History Screen
+
+Created:
+
+```text
+app/organizer/dispute-history.tsx
+```
+
+The screen receives the selected court and dispute data using Expo Router.
+
+Main parameters:
+
+```tsx
+const {
+    courtNumber,
+    teamOne,
+    teamTwo,
+    recordedTeamOneScore,
+    recordedTeamTwoScore,
+    reportedTeamOneScore,
+    reportedTeamTwoScore,
+    finalTeamOneScore,
+    finalTeamTwoScore,
+    reportedBy,
+    isContested,
+    reviewedBy,
+} = useLocalSearchParams();
+```
+
+The screen is reused for all three courts.
+
+---
+
+## Step 52 - Add Empty Dispute History State
+
+Court 1 has no dispute history.
+
+Instead of displaying empty or undefined dispute information, the screen checks:
+
+```tsx
+if (!reportedBy) {
+    return (
+        <SafeAreaView style={styles.safeArea}>
+            <View style={styles.container}>
+                <AppHeader
+                    title={`Court ${courtNumber}`}
+                    onBack={() => router.back()}
+                />
+
+                <Text style={styles.sectionTitle}>
+                    Dispute history
+                </Text>
+
+                <View style={styles.emptyState}>
+                    <Text style={styles.emptyStateText}>
+                        No disputes for this court.
+                    </Text>
+                </View>
+            </View>
+        </SafeAreaView>
+    );
+}
+```
+
+Result:
+
+```text
+Court 1
+→ No disputes for this court.
+```
+
+---
+
+## Step 53 - Add Normal Dispute History
+
+Court 2 displays one resolved dispute.
+
+The history card contains:
+
+```text
+Time
+Resolved status
+
+Reported by player
+Recorded score
+Claimed score
+Reason
+Opponent response
+
+Final score
+Resolved by organizer
+
+Dispute count badge
+```
+
+Dynamic score example:
+
+```tsx
+<Text style={styles.detailText}>
+    Recorded score:{" "}
+    {Number(recordedTeamOneScore)} -{" "}
+    {Number(recordedTeamTwoScore)}
+</Text>
+```
+
+Reported score:
+
+```tsx
+<Text style={styles.detailText}>
+    {String(reportedBy)} claimed:{" "}
+    {Number(reportedTeamOneScore)} -{" "}
+    {Number(reportedTeamTwoScore)}
+</Text>
+```
+
+Final score:
+
+```tsx
+<Text style={styles.finalScore}>
+    Final score{" "}
+    {Number(finalTeamOneScore)} -{" "}
+    {Number(finalTeamTwoScore)}
+</Text>
+```
+
+---
+
+## Step 54 - Add Contested Dispute State
+
+Court 3 uses a different dispute workflow because the other side contests the reported score.
+
+Added to the court data:
+
+```tsx
+isContested: true
+```
+
+Normal Court 2 dispute:
+
+```tsx
+isContested: false
+```
+
+The Session screen passes:
+
+```tsx
+isContested: String(court.isContested)
+```
+
+The Dispute screen converts the route value to a boolean:
+
+```tsx
+const contested = isContested === "true";
+```
+
+This allows the same screen to display different UI based on the dispute type.
+
+---
+
+## Step 55 - Add Contested Opponent Response
+
+Updated:
+
+```text
+app/organizer/dispute.tsx
+```
+
+Court 2 continues to display:
+
+```text
+Opponent has not responded
+```
+
+Court 3 displays an additional reviewed response.
+
+Conditional rendering:
+
+```tsx
+{contested ? (
+    <View style={styles.reviewedCard}>
+        <Text style={styles.reviewedTitle}>
+            Reviewed by David
+        </Text>
+
+        <View style={styles.reviewedScoreRow}>
+            <Text style={styles.reviewedLabel}>
+                Says it should be
+            </Text>
+
+            <Text style={styles.reviewedScore}>
+                {Number(teamOneScore)} - {Number(teamTwoScore)}
+            </Text>
+        </View>
+
+        <Text style={styles.reviewedReason}>
+            Reason: Score is correct as recorded
+        </Text>
+    </View>
+) : (
+    <View style={styles.responseCard}>
+        <Text style={styles.responseText}>
+            {String(teamTwo)} have not responded
+        </Text>
+    </View>
+)}
+```
+
+---
+
+## Step 56 - Separate Normal and Contested Decision Flows
+
+The bottom actions now depend on:
+
+```tsx
+contested
+```
+
+Normal dispute:
+
+```tsx
+{!contested && (
+    <>
+        <TextInput
+            style={styles.noteInput}
+            placeholder="Add a note about this decision"
+        />
+
+        <View style={styles.decisions}>
+            <DecisionButton
+                title="Accept"
+                ...
+            />
+
+            <DecisionButton
+                title="Reject"
+                ...
+            />
+        </View>
+    </>
+)}
+```
+
+Contested dispute:
+
+```tsx
+{contested && (
+    <View style={styles.goToCourtButton}>
+        <AppButton
+            title="Go to court to decide"
+            variant="primary"
+            onPress={() => {
+                // Opens Record Outcome.
+            }}
+        />
+    </View>
+)}
+```
+
+This creates two organizer flows:
+
+```text
+Normal Dispute
+→ Accept / Reject
+```
+
+and:
+
+```text
+Contested Dispute
+→ Go to court to decide
+```
+
+---
+
+## Step 57 - Connect Contested Dispute to Record Outcome
+
+The contested dispute button now opens:
+
+```text
+/organizer/record-outcome
+```
+
+Navigation:
+
+```tsx
+<AppButton
+    title="Go to court to decide"
+    variant="primary"
+    onPress={() =>
+        router.push({
+            pathname: "/organizer/record-outcome",
+            params: {
+                courtNumber: courtNumber,
+                teamOne: teamOne,
+                teamTwo: teamTwo,
+                teamOneScore: teamOneScore,
+                teamTwoScore: teamTwoScore,
+            },
+        })
+    }
+/>
+```
+
+Flow:
+
+```text
+Court 3 Dispute
+      ↓
+Opponent contests score
+      ↓
+Go to court to decide
+      ↓
+Record Outcome
+```
+
+---
+
+## Step 58 - Build Record Outcome Screen
+
+Created:
+
+```text
+app/organizer/record-outcome.tsx
+```
+
+This is a separate screen from Manage Court because it represents the organizer's final ruling after speaking with both sides.
+
+The screen receives:
+
+```tsx
+const {
+    courtNumber,
+    teamOne,
+    teamTwo,
+    teamOneScore,
+    teamTwoScore,
+} = useLocalSearchParams();
+```
+
+Final scores are placed into state:
+
+```tsx
+const [scoreOne, setScoreOne] = useState(
+    Number(teamOneScore)
+);
+
+const [scoreTwo, setScoreTwo] = useState(
+    Number(teamTwoScore)
+);
+```
+
+The same reusable `ScoreControl` component is used again.
+
+---
+
+## Step 59 - Add Final Score Controls
+
+Record Outcome allows the organizer to manually choose the final score.
+
+Example:
+
+```tsx
+<ScoreControl
+    score={scoreOne}
+    onDecrease={() => {
+        if (scoreOne > 0) {
+            setScoreOne(scoreOne - 1);
+        }
+    }}
+    onIncrease={() => {
+        if (scoreOne < 11) {
+            setScoreOne(scoreOne + 1);
+        }
+    }}
+/>
+```
+
+Both teams use the same:
+
+```text
+0 - 11
+```
+
+score limits.
+
+---
+
+## Step 60 - Add Record Outcome Note
+
+Added an optional note field:
+
+```tsx
+<View style={styles.noteSection}>
+    <Text style={styles.noteTitle}>
+        Add note
+    </Text>
+
+    <TextInput
+        style={styles.noteInput}
+        placeholder="Add a note about this decision"
+        placeholderTextColor="#99A1AF"
+    />
+</View>
+```
+
+The organizer can use this to document why the final result was selected.
+
+---
+
+## Step 61 - Confirm Final Score
+
+Added the final action:
+
+```text
+Confirm final score
+```
+
+Code:
+
+```tsx
+<AppButton
+    title="Confirm final score"
+    variant="primary"
+    onPress={() =>
+        router.push({
+            pathname: "/organizer/dispute-resolved",
+            params: {
+                courtNumber: courtNumber,
+                decision: "manual",
+                teamOneScore: scoreOne,
+                teamTwoScore: scoreTwo,
+            },
+        })
+    }
+/>
+```
+
+This reuses the existing Dispute Resolved confirmation flow.
+
+Complete Court 3 flow:
+
+```text
+Session
+      ↓
+Court 3 Resolve Dispute
+      ↓
+Contested Dispute
+      ↓
+Go to court to decide
+      ↓
+Record Outcome
+      ↓
+Adjust final score
+      ↓
+Add optional note
+      ↓
+Confirm final score
+      ↓
+Dispute Resolved
+      ↓
+Back to Session
+```
+
+---
+
+## Step 62 - Add Court 3 Contested Dispute History
+
+Court 3 contains more history than Court 2.
+
+The history screen checks:
+
+```tsx
+const contested = isContested === "true";
+```
+
+Court 3 displays:
+
+```text
+First dispute
+First final score
+
+Contested dispute
+Second final score
+
+Dispute count
+```
+
+The contested section uses:
+
+```tsx
+{contested && (
+    <View style={styles.contestedSection}>
+        <Text style={styles.contestedTitle}>
+            Contested by both sides
+        </Text>
+
+        <View style={styles.contestedDetails}>
+            <Text style={styles.detailText}>
+                Recorded score:{" "}
+                {Number(recordedTeamOneScore)} -{" "}
+                {Number(recordedTeamTwoScore)}
+            </Text>
+
+            <Text style={styles.detailText}>
+                {String(reportedBy)} claimed:{" "}
+                {Number(reportedTeamOneScore)} -{" "}
+                {Number(reportedTeamTwoScore)}
+            </Text>
+
+            <Text style={styles.reasonText}>
+                Reason: Point to wrong team
+            </Text>
+
+            <Text style={styles.detailText}>
+                {String(reviewedBy)} claimed:{" "}
+                {Number(recordedTeamOneScore)} -{" "}
+                {Number(recordedTeamTwoScore)}
+            </Text>
+
+            <Text style={styles.contestedReason}>
+                Reason: Score is correct as recorded
+            </Text>
+        </View>
+    </View>
+)}
+```
+
+---
+
+## Step 63 - Add Two Resolution Sections to Court 3 History
+
+The Court 3 Figma contains two separate dispute events.
+
+Each event has its own final-score section.
+
+Structure:
+
+```text
+Original Dispute
+
+Final Score
+Resolved by organizer
+
+Contested by both sides
+
+Final Score
+Resolved by organizer
+```
+
+Second result block:
+
+```tsx
+{contested && (
+    <View style={styles.secondResolutionSection}>
+        <Text style={styles.finalScore}>
+            Final score{" "}
+            {Number(finalTeamOneScore)} -{" "}
+            {Number(finalTeamTwoScore)}
+        </Text>
+
+        <Text style={styles.resolvedBy}>
+            Resolved by organizer
+        </Text>
+    </View>
+)}
+```
+
+This matches the Court 3 dispute-history layout more closely.
+
+Current prototype limitation:
+
+```text
+Both final-score blocks currently reuse the same final score route values.
+```
+
+A production version could store each dispute event separately in persistent history.
+
+---
+
+## Current Organizer Flow
+
+```text
+Organizer Home
+      ↓
+Session
+      ↓
+┌─────────────────────────────┐
+│                             │
+Normal Court              Disputed Court
+│                             │
+Manage Court              Resolve Dispute
+│                             │
+Edit score                ┌───────────────┐
+Save changes              │               │
+│                     Normal          Contested
+│                       │                │
+Dispute History       Accept/Reject   Go to court
+                        │                │
+                        │          Record Outcome
+                        │                │
+                        └───────┬────────┘
+                                ↓
+                        Dispute Resolved
+                                ↓
+                          Back to Session
+```
+
+---
+
+## Current Progress
+
+Completed:
+
+```text
+Organizer Home
+Organizer Session
+Dynamic Court Data
+Dynamic Court Status
+Court 2 Normal Dispute
+Court 3 Contested Dispute
+DecisionButton
+Accept / Reject
+Dispute Resolved
+Resolved Court State
+Manage Court
+ScoreControl
+CourtActionRow
+Editable Court Scores
+0-11 Score Limits
+Save Changes
+Dispute History
+Court 1 Empty History
+Court 2 Normal History
+Court 3 Contested History
+Record Outcome
+Manual Final Score
+Confirm Final Score
+Two Court 3 History Resolution Sections
+```
+
+Next:
+
+```text
+Finish Match
+End Session
+Final Round
+Final Standings
+Session Closed
+Final UI polish
+```
+
+---
+
+## Git Checkpoint - Manage Court and Contested Disputes
+
+Check changes:
+
+```bash
+git status
+git diff --stat
+git diff
+```
+
+Stage:
+
+```bash
+git add .
+```
+
+Commit:
+
+```bash
+git commit -m "Add manage court and contested dispute flow"
+```
+
+Push:
+
+```bash
+git push
+```
+
+---

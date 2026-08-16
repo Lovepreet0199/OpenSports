@@ -62,6 +62,9 @@ export default function OrganizerSessionScreen() {
                 - Resolve Dispute button
             */
             hasDispute: false,
+
+            // Court 1 was not contested by the opponent.
+            isContested: false,
         },
         {
             courtNumber: 2,
@@ -78,6 +81,9 @@ export default function OrganizerSessionScreen() {
             reportedBy: "Simon",
 
             hasDispute: true,
+
+            // Court 2 was not contested by the opponent.
+            isContested: false,
         },
         {
             courtNumber: 3,
@@ -94,6 +100,10 @@ export default function OrganizerSessionScreen() {
             reportedBy: "Omar",
 
             hasDispute: true,
+
+            // The opponent contested the reported dispute.
+            isContested: true,
+
         },
     ]);
 
@@ -259,11 +269,38 @@ export default function OrganizerSessionScreen() {
                                             teamTwo: court.teamTwo,
                                             teamOneScore: court.teamOneScore,
                                             teamTwoScore: court.teamTwoScore,
-                                            reportedTeamOneScore:
-                                                court.reportedTeamOneScore,
-                                            reportedTeamTwoScore:
-                                                court.reportedTeamTwoScore,
+                                            reportedTeamOneScore: court.reportedTeamOneScore,
+                                            reportedTeamTwoScore: court.reportedTeamTwoScore,
                                             reportedBy: court.reportedBy,
+                                            // Tells the Dispute screen whether the opponent
+                                            // has contested the original dispute.
+                                            isContested: String(court.isContested),
+                                        },
+                                    });
+                                } else {
+                                    router.push({
+                                        pathname: "/organizer/manage-court",
+                                        params: {
+                                            courtNumber: court.courtNumber,
+                                            teamOne: court.teamOne,
+                                            teamTwo: court.teamTwo,
+                                            teamOneScore: court.teamOneScore,
+                                            teamTwoScore: court.teamTwoScore,
+
+                                            /*
+                                                We also pass the original reported score because Dispute History
+                                                needs to show what the player claimed, even if the organizer
+                                                later rejected that score.
+                                            */
+                                            reportedTeamOneScore: court.reportedTeamOneScore,
+                                            reportedTeamTwoScore: court.reportedTeamTwoScore,
+                                            reportedBy: court.reportedBy,
+
+                                            //These needed later by Dispute History
+                                            isContested: String(court.isContested),
+
+                                            reviewedBy: court.isContested ? "David" : "",
+
                                         },
                                     });
                                 }
